@@ -218,3 +218,22 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# PETCARE HUB: local configuration, backups and runtime data
+.env.*
+!.env.example
+backups/
+filestore/
+odoo-data/
+postgres-data/
+*.dump
+*.sql
+*.sql.gz
+*.zip
+*.mp4
+*.mov
+*.pem
+*.key
+.DS_Store
+Thumbs.db
+~$*
