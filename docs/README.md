@@ -4,9 +4,9 @@
 
 | Tài liệu | Link do nhóm cập nhật |
 | --- | --- |
-| Master Plan đang sử dụng | Chờ Lead bổ sung |
-| Báo cáo chung | Chờ Lead bổ sung |
+| Master Plan đang sử dụng | https://docs.google.com/spreadsheets/d/1AeYxvQEFW45ZQS-qf6JeyYEHHni8q8Xc |
+| Báo cáo chung (Mẫu đồ án, Tab 1) | https://docs.google.com/document/d/1vUWnnaeDTN0bl7rgwppICi1dWGDXrwcQ6rQqaKNMfdc |
 | Figma chung | Chờ Nam Hiên bổ sung |
-| Drive minh chứng và video | Chờ Lead bổ sung |
+| Drive nộp bài (01–06) | https://drive.google.com/drive/folders/18MOtRydudcB_UY7Y6QuQCNSFsQR7ozuV |
 
 Ghi mã việc trong tên tài liệu khi có, ví dụ `TR-10-thanh-toan-sandbox.md`.
