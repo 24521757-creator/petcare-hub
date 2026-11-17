@@ -37,21 +37,23 @@ Sơ đồ nộp cả `.puml` và `.png` cùng tên, ví dụ `activity_UC04.puml
 
 ## Chạy Odoo trên máy cá nhân
 
-Mở Docker Desktop. Tại thư mục repo, dùng PowerShell:
+Đây là bộ cấu hình Docker chính thức của nhóm (thay cho file zip cũ trên Drive). Mở Docker Desktop, tại thư mục repo dùng PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
-```
-
-Đổi mật khẩu PostgreSQL trong `.env` trước lần chạy đầu, rồi chạy:
-
-```powershell
+notepad .env                 # đổi PG_PASSWORD
+notepad config\odoo.conf     # đổi admin_passwd (Master Password)
+git update-index --skip-worktree config/odoo.conf   # để không lỡ commit mật khẩu thật
 docker compose up -d
 ```
 
-Mở `http://localhost:8070`, tạo CSDL phát triển và cài các ứng dụng cần dùng. Mỗi máy tạo CSDL riêng. Nếu cổng 8070 đang chạy bản thử cũ, dừng bản đó hoặc đổi `ODOO_HTTP_PORT` trong `.env`.
+Đổi hai mật khẩu trước lần chạy đầu: PostgreSQL chỉ nhận mật khẩu lúc tạo CSDL lần đầu.
 
-Hai module trong `addons/` sẽ được cài sau khi có code hoàn chỉnh. Khi đặt tên CSDL, cài ứng dụng và tạo dữ liệu, cả nhóm làm theo hướng dẫn của người giữ bản demo chung.
+Sau đó mở `http://localhost:8070/web/database/manager`, chọn **Restore Database**, chọn file sao lưu `petcare_hub_*.zip` mới nhất trong thư mục `04_Odoo Demo` trên Drive, đặt tên CSDL là `petcare_hub` và chọn *This database is a copy*. Cấu hình chỉ cho phép CSDL tên `petcare_hub` (`dbfilter`).
+
+Máy đã chạy bản zip cũ: chạy `docker compose down` (không có `-v`) trong thư mục cũ, rồi `docker compose up -d` trong repo. Tên project, container và volume giống nhau nên dữ liệu được giữ nguyên.
+
+`proxy_mode` đã bật để nhận webhook Stripe qua đường hầm (TR-10). Cổng 8070 chỉ mở trên máy mình (127.0.0.1).
 
 ## Dữ liệu và cấu hình Odoo
 

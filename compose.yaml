@@ -1,32 +1,41 @@
-name: petcare-hub
+# PETCARE HUB – môi trường Odoo 19 dùng chung cho cả nhóm (TR-09).
+# Tên project, container và volume giữ đúng như bản đã chạy trên máy Thùy Trâm,
+# nên chuyển sang dùng file này không mất dữ liệu đang có.
+name: petcare_hub
 services:
   db:
     image: postgres:16
+    container_name: petcare_db
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: odoo
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?Đặt PG_PASSWORD trong file .env}
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - petcare-db-data:/var/lib/postgresql/data
     healthcheck:
       test: [CMD-SHELL, pg_isready -U odoo -d postgres]
       interval: 5s
       timeout: 5s
       retries: 20
+    restart: unless-stopped
   odoo:
     image: odoo:19.0
+    container_name: petcare_odoo
     depends_on:
       db:
         condition: service_healthy
     environment:
       HOST: db
       USER: odoo
-      PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      PASSWORD: ${PG_PASSWORD:?Đặt PG_PASSWORD trong file .env}
     ports:
+      # Chỉ mở trên máy mình; Stripe gọi về qua đường hầm (tunnel) trỏ tới cổng này.
       - '127.0.0.1:${ODOO_HTTP_PORT:-8070}:8069'
     volumes:
-      - odoo-data:/var/lib/odoo
+      - petcare-odoo-data:/var/lib/odoo
+      - ./config:/etc/odoo
       - ./addons:/mnt/extra-addons
+    restart: unless-stopped
 volumes:
-  db-data:
-  odoo-data:
+  petcare-db-data:
+  petcare-odoo-data:
