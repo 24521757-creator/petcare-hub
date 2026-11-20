@@ -24,6 +24,11 @@ skinparam package {
 hide empty members
 hide circle
 
+  class "PaymentPortal\n(payment – lớp cha)" as BasePortal <<controller>> {
+    + /payment/transaction
+    # _create_transaction(...)
+    # _validate_transaction_kwargs(kwargs)
+  }
   class "WebsiteSale\n(website_sale)" as WebsiteSale <<controller>> {
     + /shop/cart, /shop/checkout, /shop/address
     + /shop/payment
@@ -120,6 +125,10 @@ class "Stripe API\n(hệ ngoài – hộp đen)" as Stripe <<external>> {
   + gửi webhook payment_intent.*
 }
 
+' ---- Kế thừa lớp controller (Python) ----
+BasePortal <|-down- WebsiteSale
+BasePortal <|-down- PaymentPortal
+
 ' ---- Phụ thuộc từ controller tới model (tầng trên gọi tầng dưới) ----
 WebsiteSale .down.> SaleOrder : đọc / cập nhật giỏ
 PaymentPortal .down.> SaleOrder : khóa đơn, kiểm tra
@@ -132,7 +141,7 @@ Stripe .up.> StripeController : redirect, webhook
 
 ' ---- Quan hệ giữa các model (bội số theo sheet 05c) ----
 SaleOrder "0..*" -right- "0..*" PaymentTransaction
-StockPicking "0..*" -right-> "0..1" SaleOrder : sale_id
+SaleOrder "0..1" o-left- "0..*" StockPicking : sale_id
 SaleOrder "1" *-down- "0..*" SaleOrderLine : order_id
 SaleOrderLine "0..*" -down-> "0..1" ProductProduct : product_id
 StockQuant "0..*" -left-> "1" ProductProduct : product_id
@@ -161,6 +170,7 @@ legend bottom
   Nhóm không viết model mới cho UC-05 (hướng BUY/CUSTOMIZE). Mọi lớp là model hoặc controller chuẩn của Odoo 19.
   Tên trong «...» là lớp khái niệm tương ứng trong từ điển dữ liệu (tab 05). Bội số theo sheet 05c. Đơn – giao dịch là quan hệ N–N qua bảng sale_order_transaction_rel.
   <color:#9DC3E6>██</color> Tầng web – controller (kế thừa http.Controller)    <color:#FFD966>██</color> Tầng nghiệp vụ – model Odoo (ORM, bảng PostgreSQL)    <color:#BFBFBF>██</color> Hệ ngoài
-  Mũi tên nét liền: liên kết giữa các model.   Mũi tên nét đứt: controller gọi model / gọi hệ ngoài.
+  Quan hệ: tam giác rỗng = kế thừa lớp; thoi đặc = hợp thành (dòng đơn thuộc về đơn); thoi rỗng = kết tập (phiếu kho gắn với đơn);
+  nét liền = liên kết giữa các model; nét đứt = controller gọi model hoặc gọi hệ ngoài.
 endlegend
 @enduml
