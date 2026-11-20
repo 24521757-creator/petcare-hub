@@ -1,0 +1,89 @@
+@startuml state_UC05
+title PETCARE HUB – Biểu đồ trạng thái UC-05: Đơn hàng (sale.order) và Giao dịch thanh toán (payment.transaction)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #404040
+skinparam nodesep 55
+skinparam ranksep 55
+skinparam state {
+  BackgroundColor #FFF2CC
+  BorderColor #BF9000
+  StartColor #404040
+  EndColor #404040
+}
+
+state "Đơn hàng – sale.order.state" as ORDER #FAFAFA {
+  state "Chưa xác nhận" as o_open #FFFBEA {
+    state "draft\n(giỏ hàng / báo giá nháp)" as o_draft
+    state "sent\n(báo giá đã gửi)" as o_sent
+    [*] -down-> o_draft : thêm sản phẩm vào giỏ\n(tạo sale.order gắn website)
+    o_draft -up-> o_draft : sửa giỏ, đổi địa chỉ /\nphương thức giao, tính lại giá
+    o_draft -down-> o_sent : giao dịch pending [không phải COD]\n/ action_quotation_sent()
+  }
+  state "sale\n(đơn đã xác nhận)" as o_sale #E2EFDA
+  state "cancel\n(đã hủy)" as o_cancel #F2F2F2
+  state "kết thúc" as o_end1 <<end>>
+  state "kết thúc" as o_end2 <<end>>
+
+  [*] -down-> o_open
+  o_open -down-> o_sale : giao dịch done\n[_is_confirmation_amount_reached()]\n/ action_confirm()
+  o_draft -down-> o_sale : giao dịch COD pending\n/ action_confirm() (module delivery)
+  o_open -down-> o_cancel : action_cancel()
+  o_sale -right-> o_cancel : action_cancel() của nhân viên\n[locked = False]
+  o_sale -down-> o_end1 : chuyển sang xử lý\ngiao hàng (UC-10)
+  o_cancel -down-> o_end2
+
+  note left of o_sale
+    entry / sinh phiếu xuất kho
+    stock.picking (sale_stock),
+    gửi email xác nhận cho khách.
+    Khóa đơn dùng cờ locked,
+    không có trạng thái 'done'.
+  end note
+}
+
+state "Giao dịch thanh toán – payment.transaction.state" as TX #FAFAFA {
+  state "Chưa có kết quả cuối" as t_open #FFFBEA {
+    state "draft\n(vừa tạo)" as t_draft
+    state "pending\n(chờ xử lý)" as t_pending
+    [*] -down-> t_draft : khách nhấn "Thanh toán ngay"\n[còn hàng, tổng tiền không đổi]\n/ _create_transaction()
+    t_draft -up-> t_draft : Stripe: requires_action\n(3-D Secure, A3)
+    t_draft -down-> t_pending : COD: /payment/custom/process\nhoặc Stripe: processing\n/ _set_pending()
+  }
+  state "authorized\n(đã giữ tiền)" as t_auth
+  state "done\n(đã thanh toán)" as t_done #E2EFDA
+  state "error\n(lỗi / bị từ chối)" as t_error #FCE4D6
+  state "cancel\n(đã hủy)" as t_cancel #F2F2F2
+  state "kết thúc" as t_end1 <<end>>
+  state "kết thúc" as t_end2 <<end>>
+  state "kết thúc" as t_end3 <<end>>
+  state "kết thúc" as t_end4 <<end>>
+
+  [*] -down-> t_open
+  t_open -down-> t_error : lỗi kết nối (E9), thẻ bị từ chối (E2),\nsố tiền không khớp (E7), Stripe: failed\n/ _set_error()
+  t_open -down-> t_done : Stripe: succeeded\n[_validate_amount() đạt]\n/ _set_done()
+  t_open -down-> t_auth : Stripe: requires_capture\n/ _set_authorized()
+  t_open -down-> t_cancel : khách hủy (E3),\nStripe: canceled\n/ _set_canceled()
+  t_error -right-> t_done : succeeded đến muộn\n/ _set_done()
+  t_auth -left-> t_done : thu tiền (capture)\n/ _set_done()
+  t_auth -right-> t_cancel : hủy giữ tiền (void)\n/ _set_canceled()
+  t_pending -down-> t_end4 : COD: đơn đã xác nhận,\nthu tiền khi giao hàng
+  t_done -down-> t_end1 : _post_process()\n(is_post_processed = True)
+  t_error -down-> t_end2 : khách thử lại → giao dịch mới\n(S00001-1, S00001-2, ...)
+  t_cancel -down-> t_end3 : khách thử lại\n→ giao dịch mới
+
+  note bottom of t_auth
+    PetCare Hub không bật thu tiền thủ công (capture)
+    trên Stripe, nên luồng chuẩn đi thẳng draft → done.
+    authorized giữ lại để đúng mô hình của Odoo.
+  end note
+}
+
+legend bottom
+  Mũi tên đi ra từ khung "Chưa xác nhận" / "Chưa có kết quả cuối" áp dụng cho mọi trạng thái bên trong khung.
+  Thông báo lặp (cùng trạng thái đích) chỉ ghi log, không chuyển trạng thái lần hai (E5).
+  Mỗi lần thanh toán lại là một payment.transaction mới; sale.order vẫn ở draft cho tới khi có giao dịch hợp lệ.
+endlegend
+@enduml
