@@ -139,7 +139,7 @@ StripeController .down.> PaymentTransaction : _process('stripe')
 PaymentTransaction .right.> Stripe : gọi API
 Stripe .up.> StripeController : redirect, webhook
 
-' ---- Quan hệ giữa các model (bội số theo sheet 05c) ----
+' ---- Quan hệ giữa các model (bội số theo ERD, Hình 4.2.1) ----
 SaleOrder "0..*" -right- "0..*" PaymentTransaction
 SaleOrder "0..1" o-left- "0..*" StockPicking : sale_id
 SaleOrder "1" *-down- "0..*" SaleOrderLine : order_id
@@ -168,7 +168,7 @@ end note
 
 legend bottom
   Nhóm không viết model mới cho UC-05 (hướng BUY/CUSTOMIZE). Mọi lớp là model hoặc controller chuẩn của Odoo 19.
-  Tên trong «...» là lớp khái niệm tương ứng trong từ điển dữ liệu (tab 05). Bội số theo sheet 05c. Đơn – giao dịch là quan hệ N–N qua bảng sale_order_transaction_rel.
+  Tên trong «...» là lớp khái niệm nghiệp vụ mà model Odoo đảm nhận. Bội số theo khóa ngoại trong ERD (Hình 4.2.1). Đơn – giao dịch là quan hệ N–N qua bảng sale_order_transaction_rel.
   <color:#9DC3E6>██</color> Tầng web – controller (kế thừa http.Controller)    <color:#FFD966>██</color> Tầng nghiệp vụ – model Odoo (ORM, bảng PostgreSQL)    <color:#BFBFBF>██</color> Hệ ngoài
   Quan hệ: tam giác rỗng = kế thừa lớp; thoi đặc = hợp thành (dòng đơn thuộc về đơn); thoi rỗng = kết tập (phiếu kho gắn với đơn);
   nét liền = liên kết giữa các model; nét đứt = controller gọi model hoặc gọi hệ ngoài.
