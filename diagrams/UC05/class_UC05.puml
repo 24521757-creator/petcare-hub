@@ -1,0 +1,166 @@
+@startuml class_UC05
+title PETCARE HUB – Biểu đồ lớp UC-05: Đặt hàng & thanh toán trực tuyến (ánh xạ model Odoo 19)
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #404040
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 90
+skinparam ranksep 80
+skinparam class {
+  BackgroundColor #FFF2CC
+  BorderColor #BF9000
+  BackgroundColor<<controller>> #DEEAF6
+  BorderColor<<controller>> #2E75B6
+  BackgroundColor<<external>> #F2F2F2
+  BorderColor<<external>> #7F7F7F
+}
+skinparam package {
+  BorderColor #7F7F7F
+  FontStyle bold
+}
+hide empty members
+hide circle
+
+  class "WebsiteSale\n(website_sale)" as WebsiteSale <<controller>> {
+    + /shop/cart, /shop/checkout, /shop/address
+    + /shop/payment
+    + /shop/payment/validate
+    + /shop/confirmation
+    - _get_shop_payment_errors(order)
+  }
+  class "PaymentPortal\n(website_sale)" as PaymentPortal <<controller>> {
+    + /shop/payment/transaction/<order_id>
+    - _validate_transaction_for_order(tx, order)
+  }
+  class "PaymentPostProcessing\n(payment)" as PaymentPostProcessing <<controller>> {
+    + /payment/status
+    + /payment/status/poll
+  }
+  class "CustomController\n(payment_custom)" as CustomController <<controller>> {
+    + /payment/custom/process
+  }
+  class "StripeController\n(payment_stripe)" as StripeController <<controller>> {
+    + /payment/stripe/return
+    + /payment/stripe/webhook
+    - _verify_signature(tx)
+  }
+
+  class "sale.order  «Order»" as SaleOrder {
+    name : Char
+    date_order : Datetime
+    state : Selection {draft, sent, sale, cancel}
+    locked : Boolean
+    amount_untaxed : Monetary
+    amount_total : Monetary
+    website_id : Many2one  «website_sale»
+    carrier_id : Many2one  «delivery»
+    --
+    + action_confirm()
+    + _check_cart_is_ready_to_be_paid()
+    + _is_confirmation_amount_reached()
+  }
+  class "sale.order.line  «OrderItem»" as SaleOrderLine {
+    name : Text
+    product_uom_qty : Float
+    price_unit : Float
+    discount : Float
+    price_subtotal : Monetary
+    tax_ids : Many2many
+  }
+  class "res.partner  «Customer / Address»" as ResPartner {
+    name, email, phone : Char
+    type : Selection {contact, delivery, invoice, ...}
+    street, street2, city, zip : Char
+    state_id, country_id : Many2one
+    active : Boolean
+  }
+  class "payment.transaction  «OrderPayment»" as PaymentTransaction {
+    reference : Char
+    provider_reference : Char
+    amount : Monetary
+    state : Selection {draft, pending, authorized, done, cancel, error}
+    is_post_processed : Boolean
+    --
+    + _get_processing_values()
+    + _process(provider_code, data)
+    - _validate_amount(data)
+    - _apply_updates(data)
+    + _set_pending() / _set_done()
+    + _set_error() / _set_canceled()
+    + _post_process()
+    + _check_amount_and_confirm_order()  «sale»
+  }
+  class "payment.provider" as PaymentProvider {
+    name : Char
+    code : Selection {stripe, custom, ...}
+    state : Selection {disabled, enabled, test}
+    custom_mode : Selection {wire_transfer, cash_on_delivery}
+  }
+  class "product.product" as ProductProduct {
+    default_code : Char
+    active : Boolean
+  }
+  class "stock.quant  «Inventory»" as StockQuant {
+    quantity : Float
+    reserved_quantity : Float
+  }
+  class "stock.picking  «Shipment»" as StockPicking {
+    name : Char
+    state : Selection
+    carrier_tracking_ref : Char
+    date_done : Datetime
+  }
+
+class "Stripe API\n(hệ ngoài – hộp đen)" as Stripe <<external>> {
+  + POST payment_intents
+  + GET payment_intents/{id}
+  + gửi webhook payment_intent.*
+}
+
+' ---- Phụ thuộc từ controller tới model (tầng trên gọi tầng dưới) ----
+WebsiteSale .down.> SaleOrder : đọc / cập nhật giỏ
+PaymentPortal .down.> SaleOrder : khóa đơn, kiểm tra
+PaymentPortal .down.> PaymentTransaction : _create_transaction()
+PaymentPostProcessing .down.> PaymentTransaction : _post_process()
+CustomController .down.> PaymentTransaction : _process('custom')
+StripeController .down.> PaymentTransaction : _process('stripe')
+PaymentTransaction .right.> Stripe : gọi API
+Stripe .up.> StripeController : redirect, webhook
+
+' ---- Quan hệ giữa các model (bội số theo sheet 05c) ----
+SaleOrder "0..*" -right- "0..*" PaymentTransaction
+StockPicking "0..*" -right-> "0..1" SaleOrder : sale_id
+SaleOrder "1" *-down- "0..*" SaleOrderLine : order_id
+SaleOrderLine "0..*" -down-> "0..1" ProductProduct : product_id
+StockQuant "0..*" -left-> "1" ProductProduct : product_id
+ResPartner "1" -up- "0..*" SaleOrder : partner_id,\npartner_shipping_id
+ResPartner "0..1" -- "0..*" ResPartner : parent_id
+PaymentTransaction "0..*" -down-> "1" ResPartner : partner_id
+PaymentTransaction "0..*" -down-> "1" PaymentProvider : provider_id
+
+note left of SaleOrder
+  _inherit = 'sale.order' ở các module:
+  website_sale (giỏ trên website, kiểm tra trước thanh toán),
+  website_sale_stock (chặn hết hàng),
+  delivery (carrier_id, phí giao),
+  sale_stock (picking_ids, sinh phiếu kho khi xác nhận).
+end note
+
+note right of PaymentTransaction
+  _inherit = 'payment.transaction' ở các module:
+  sale (sale_order_ids, xác nhận đơn),
+  payment_stripe (PaymentIntent, ánh xạ trạng thái),
+  payment_custom (COD đặt pending),
+  delivery (COD pending → action_confirm()).
+end note
+
+legend bottom
+  Nhóm không viết model mới cho UC-05 (hướng BUY/CUSTOMIZE). Mọi lớp là model hoặc controller chuẩn của Odoo 19.
+  Tên trong «...» là lớp khái niệm tương ứng trong từ điển dữ liệu (tab 05). Bội số theo sheet 05c. Đơn – giao dịch là quan hệ N–N qua bảng sale_order_transaction_rel.
+  <color:#9DC3E6>██</color> Tầng web – controller (kế thừa http.Controller)    <color:#FFD966>██</color> Tầng nghiệp vụ – model Odoo (ORM, bảng PostgreSQL)    <color:#BFBFBF>██</color> Hệ ngoài
+  Mũi tên nét liền: liên kết giữa các model.   Mũi tên nét đứt: controller gọi model / gọi hệ ngoài.
+endlegend
+@enduml
