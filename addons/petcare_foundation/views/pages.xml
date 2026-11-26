@@ -1,0 +1,520 @@
+<odoo>
+  <template id="nav" name="Điều hướng PetCare">
+    <t t-set="dog_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Chó'),('parent_id','=',False)],limit=1)"/>
+    <t t-set="cat_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Mèo'),('parent_id','=',False)],limit=1)"/>
+    <t t-set="dog_dry_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Thức ăn khô'),('parent_id.parent_id','=',dog_category.id)],limit=1) if dog_category else False"/>
+    <t t-set="cat_dry_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Thức ăn khô'),('parent_id.parent_id','=',cat_category.id)],limit=1) if cat_category else False"/>
+    <t t-set="dog_toys_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Đồ chơi cho chó'),('parent_id','=',dog_category.id)],limit=1) if dog_category else False"/>
+    <t t-set="cat_toys_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Đồ chơi cho mèo'),('parent_id','=',cat_category.id)],limit=1) if cat_category else False"/>
+    <div class="petcare-nav" data-petcare-nav="1">
+      <div class="petcare-nav-inner">
+        <button class="petcare-menu-toggle" type="button" aria-label="Mở danh mục" aria-expanded="false" aria-controls="petcare-drawer"><svg width="24" height="18" viewBox="0 0 24 18" fill="none" aria-hidden="true"><rect x="0" y="1" width="24" height="2.4" rx="1.2" fill="currentColor"/><rect x="0" y="7.8" width="24" height="2.4" rx="1.2" fill="currentColor"/><rect x="0" y="14.6" width="24" height="2.4" rx="1.2" fill="currentColor"/></svg></button>
+        <a href="/" class="petcare-logo" aria-label="PetCare Hub - Trang chủ">PETCARE HUB<span class="petcare-logo-dot">.</span></a>
+        <form action="/shop" method="get" class="petcare-search" role="search"><input type="search" name="search" aria-label="Tìm sản phẩm" placeholder="Tìm món yêu thích cho bé..."/><button type="submit" aria-label="Tìm kiếm"><i class="fa fa-search" aria-hidden="true"/></button></form>
+        <a class="petcare-top-action petcare-desktop-action" href="/petcare/pets"><i class="fa fa-paw" aria-hidden="true"/><span>Thú cưng</span></a>
+        <a class="petcare-top-action petcare-desktop-action" href="/petcare/services"><i class="fa fa-calendar-check-o" aria-hidden="true"/><span>Dịch vụ</span></a>
+        <a class="petcare-top-action petcare-wishlist" href="/shop/wishlist" aria-label="Danh sách yêu thích"><span class="petcare-cart-icon"><i class="fa fa-heart-o" aria-hidden="true"/><t t-set="pc_wish_qty" t-value="len(request.env['product.wishlist'].current())"/><span t-attf-class="petcare-cart-count pc_wish_count #{'is-empty' if not pc_wish_qty else ''}" t-esc="pc_wish_qty"/></span><span class="petcare-cart-label">Yêu thích</span></a>
+        <a class="petcare-top-action petcare-account" href="/my"><i class="fa fa-user-circle-o" aria-hidden="true"/><span>Tài khoản</span></a>
+        <a class="petcare-top-action petcare-cart" href="/shop/cart" aria-label="Giỏ hàng"><span class="petcare-cart-icon"><i class="fa fa-shopping-cart" aria-hidden="true"/><t t-set="pc_cart_qty" t-value="request.session.get('website_sale_cart_quantity', 0) or 0"/><span t-attf-class="petcare-cart-count my_cart_quantity #{'is-empty' if not pc_cart_qty else ''}" t-esc="pc_cart_qty"/></span><span class="petcare-cart-label">Giỏ hàng</span></a>
+      </div>
+      <div class="petcare-links-bar">
+        <div class="petcare-links">
+          <div class="petcare-menu" data-petcare-menu="dog">
+            <a class="petcare-menu-trigger" t-att-href="'/shop/category/%s' % dog_category.id if dog_category else '/shop?search=dog'" aria-haspopup="true" aria-expanded="false">Dành cho chó <i class="fa fa-angle-down" aria-hidden="true"/></a>
+            <div class="petcare-mega" role="region" aria-label="Danh mục dành cho chó">
+              <div class="petcare-mega-inner">
+                <div class="petcare-mega-col">
+                  <a class="petcare-mega-heading" t-att-href="'/shop/category/%s' % dog_category.id if dog_category else '/shop?search=dog'">Thức ăn cho chó <span>›</span></a>
+                  <a t-att-href="'/shop/category/%s' % dog_category.id if dog_category else '/shop?search=dog'">Xem tất cả cho chó</a>
+                  <a t-att-href="'/shop/category/%s' % dog_dry_category.id if dog_dry_category else ('/shop/category/%s?search=thức+ăn+khô' % dog_category.id if dog_category else '/shop?search=thức+ăn+khô')">Thức ăn khô</a>
+                  <a t-att-href="'/shop/category/%s?search=thức+ăn+ướt' % dog_category.id if dog_category else '/shop?search=thức+ăn+ướt+cho+chó'">Thức ăn ướt</a>
+                  <a t-att-href="'/shop/category/%s?search=chó+con' % dog_category.id if dog_category else '/shop?search=chó+con'">Dành cho chó con</a>
+                  <a t-att-href="'/shop/category/%s?search=trưởng+thành' % dog_category.id if dog_category else '/shop?search=trưởng+thành'">Dành cho chó trưởng thành</a>
+                </div>
+                <div class="petcare-mega-col">
+                  <a class="petcare-mega-heading" t-att-href="'/shop/category/%s' % dog_toys_category.id if dog_toys_category else '/shop?search=đồ+chơi+cho+chó'">Đồ thưởng &amp; Vui chơi <span>›</span></a>
+                  <a href="/shop?search=đồ+thưởng+cho+chó">Đồ thưởng &amp; Bánh snack</a>
+                  <a t-att-href="'/shop/category/%s' % dog_toys_category.id if dog_toys_category else '/shop?search=đồ+chơi+cho+chó'">Đồ chơi cho chó</a>
+                  <a href="/shop?search=vệ+sinh">Chăm sóc &amp; Vệ sinh</a>
+                  <a href="/shop">Tất cả sản phẩm cửa hàng</a>
+                </div>
+                <div class="petcare-mega-col">
+                  <a class="petcare-mega-heading" href="/petcare/services">Dịch vụ chăm sóc <span>›</span></a>
+                  <a href="/petcare/services">Tắm và vệ sinh cơ bản</a>
+                  <a href="/petcare/services">Cắt tỉa lông tạo kiểu</a>
+                  <a href="/petcare/booking">Đặt lịch chăm sóc ngay</a>
+                  <a href="/petcare/pets">Hồ sơ thú cưng của tôi</a>
+                </div>
+                <div class="petcare-mega-promo petcare-promo-mint">
+                  <div class="petcare-promo-top">
+                    <span class="petcare-promo-thumb"><img src="/petcare_foundation/static/src/img/cho-card.png" alt="Bé cún"/></span>
+                    <div>
+                      <span class="petcare-promo-kicker">GỢI Ý CHO BÉ CÚN</span>
+                      <strong>Chăm chút từng bữa ăn ngon</strong>
+                    </div>
+                  </div>
+                  <p>Khám phá hơn 450+ thức ăn &amp; đồ chơi chính hãng dành riêng cho chó cưng.</p>
+                  <a class="petcare-btn" t-att-href="'/shop/category/%s' % dog_category.id if dog_category else '/shop'">Khám phá ngay →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="petcare-menu" data-petcare-menu="cat">
+            <a class="petcare-menu-trigger" t-att-href="'/shop/category/%s' % cat_category.id if cat_category else '/shop?search=cat'" aria-haspopup="true" aria-expanded="false">Dành cho mèo <i class="fa fa-angle-down" aria-hidden="true"/></a>
+            <div class="petcare-mega" role="region" aria-label="Danh mục dành cho mèo">
+              <div class="petcare-mega-inner">
+                <div class="petcare-mega-col">
+                  <a class="petcare-mega-heading" t-att-href="'/shop/category/%s' % cat_category.id if cat_category else '/shop?search=cat'">Thức ăn cho mèo <span>›</span></a>
+                  <a t-att-href="'/shop/category/%s' % cat_category.id if cat_category else '/shop?search=cat'">Xem tất cả cho mèo</a>
+                  <a t-att-href="'/shop/category/%s' % cat_dry_category.id if cat_dry_category else ('/shop/category/%s?search=thức+ăn+khô' % cat_category.id if cat_category else '/shop?search=thức+ăn+khô')">Thức ăn khô</a>
+                  <a t-att-href="'/shop/category/%s?search=thức+ăn+ướt' % cat_category.id if cat_category else '/shop?search=thức+ăn+ướt+cho+mèo'">Thức ăn ướt</a>
+                  <a t-att-href="'/shop/category/%s?search=mèo+con' % cat_category.id if cat_category else '/shop?search=mèo+con'">Dành cho mèo con</a>
+                  <a t-att-href="'/shop/category/%s?search=trưởng+thành' % cat_category.id if cat_category else '/shop?search=trưởng+thành'">Dành cho mèo trưởng thành</a>
+                </div>
+                <div class="petcare-mega-col">
+                  <a class="petcare-mega-heading" t-att-href="'/shop/category/%s' % cat_toys_category.id if cat_toys_category else '/shop?search=đồ+chơi+cho+mèo'">Vệ sinh &amp; Vui chơi <span>›</span></a>
+                  <a href="/shop?search=cát+vệ+sinh+cho+mèo">Cát vệ sinh cho mèo</a>
+                  <a t-att-href="'/shop/category/%s' % cat_toys_category.id if cat_toys_category else '/shop?search=đồ+chơi+cho+mèo'">Đồ chơi cho mèo</a>
+                  <a href="/shop?search=đồ+thưởng+cho+mèo">Đồ thưởng &amp; Pate cho mèo</a>
+                  <a href="/shop">Tất cả sản phẩm cửa hàng</a>
+                </div>
+                <div class="petcare-mega-col">
+                  <a class="petcare-mega-heading" href="/petcare/services">Dịch vụ chăm sóc <span>›</span></a>
+                  <a href="/petcare/services">Tắm và vệ sinh dịu nhẹ</a>
+                  <a href="/petcare/services">Cắt tỉa &amp; gỡ rối lông</a>
+                  <a href="/petcare/booking">Đặt lịch chăm sóc ngay</a>
+                  <a href="/petcare/pets">Hồ sơ thú cưng của tôi</a>
+                </div>
+                <div class="petcare-mega-promo petcare-promo-pink">
+                  <div class="petcare-promo-top">
+                    <span class="petcare-promo-thumb"><img src="/petcare_foundation/static/src/img/meo-card.png" alt="Bé mèo"/></span>
+                    <div>
+                      <span class="petcare-promo-kicker">GỢI Ý CHO BÉ MÈO</span>
+                      <strong>Thế giới dịu dàng cho mèo yêu</strong>
+                    </div>
+                  </div>
+                  <p>Chọn thức ăn, đồ chơi yêu thích và đặt lịch spa chăm sóc nhẹ nhàng cho bé.</p>
+                  <a class="petcare-btn pc-pink-btn" t-att-href="'/shop/category/%s' % cat_category.id if cat_category else '/shop'">Khám phá ngay →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <a href="/shop">Tất cả sản phẩm</a>
+          <div class="petcare-menu" data-petcare-menu="services">
+            <a class="petcare-menu-trigger" href="/petcare/services" aria-haspopup="true" aria-expanded="false">Dịch vụ chăm sóc <i class="fa fa-angle-down" aria-hidden="true"/></a>
+            <div class="petcare-mega petcare-mega-services" role="region" aria-label="Danh mục dịch vụ chăm sóc">
+              <div class="pc-svc-menu-wrap">
+                <div class="pc-svc-menu-grid">
+                  <a class="pc-svc-menu-card" href="/petcare/services#tam-co-ban">
+                    <span class="pc-svc-menu-thumb"><img src="/petcare_foundation/static/src/img/service-tam-co-ban.jpg" alt="Tắm và vệ sinh cơ bản cho thú cưng"/></span>
+                    <strong>Tắm và vệ sinh cơ bản</strong>
+                    <span>Tắm sữa tắm dịu nhẹ, sấy mượt, vệ sinh tai &amp; móng</span>
+                  </a>
+                  <a class="pc-svc-menu-card" href="/petcare/services#cat-tia-long">
+                    <span class="pc-svc-menu-thumb"><img src="/petcare_foundation/static/src/img/service-cat-tia-long.jpg" alt="Cắt tỉa lông thú cưng"/></span>
+                    <strong>Cắt tỉa lông</strong>
+                    <span>Gỡ rối, cắt tỉa tạo kiểu gọn gàng cho chó &amp; mèo</span>
+                  </a>
+                </div>
+                <div class="pc-svc-menu-footer">
+                  <a class="pc-svc-menu-book" href="/petcare/booking">Đặt lịch chăm sóc thú cưng <span>›</span></a>
+                  <a class="pc-svc-menu-sub" href="/petcare/services">Xem chi tiết bảng dịch vụ <span>›</span></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <a href="/petcare/booking">Đặt lịch</a>
+          <a href="/petcare/pets">Hồ sơ thú cưng</a>
+          <a href="/my/orders">Đơn hàng của tôi</a>
+        </div>
+      </div>
+      <div class="petcare-mega-backdrop" hidden="hidden"/>
+      <div class="petcare-drawer-backdrop" hidden="hidden"/>
+      <aside id="petcare-drawer" class="petcare-drawer" aria-label="Danh mục điều hướng" aria-hidden="true" inert="inert">
+        <div class="petcare-drawer-head"><span class="petcare-logo">PETCARE HUB<span class="petcare-logo-dot">.</span></span><button class="petcare-drawer-close" type="button" aria-label="Đóng danh mục">×</button></div>
+        <div class="petcare-drawer-body"><h2>Cửa hàng</h2><a t-att-href="'/shop/category/%s' % dog_category.id if dog_category else '/shop?search=dog'">Dành cho chó <span>›</span></a><a t-att-href="'/shop/category/%s' % cat_category.id if cat_category else '/shop?search=cat'">Dành cho mèo <span>›</span></a><a href="/shop">Tất cả sản phẩm <span>›</span></a><a href="/shop/cart">Giỏ hàng <span>›</span></a><h2>Chăm sóc thú cưng</h2><a href="/petcare/services">Dịch vụ chăm sóc <span>›</span></a><a href="/petcare/booking">Đặt lịch chăm sóc <span>›</span></a><a href="/petcare/pets">Hồ sơ thú cưng <span>›</span></a><h2>Tài khoản của tôi</h2><a href="/my">Tài khoản <span>›</span></a><a href="/my/orders">Đơn hàng của tôi <span>›</span></a></div>
+      </aside>
+    </div>
+  </template>
+  <template id="home" name="PetCare Hub">
+    <t t-call="website.layout"><div id="wrap" class="petcare-page"><t t-set="dog_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Chó'),('parent_id','=',False)],limit=1)"/><t t-set="cat_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Mèo'),('parent_id','=',False)],limit=1)"/><t t-call="petcare_foundation.nav"/>
+      <div class="petcare-content">
+        <section class="pc-carousel" aria-label="Thông tin nổi bật" aria-roledescription="trình chiếu">
+          <!-- Slide 1: Khung sọc chéo xanh lá + hồng pastel (phong cách ảnh 9) -->
+          <article class="pc-slide pc-slide-ribbon is-active" aria-hidden="false">
+            <span class="pc-top-pill">TUẦN LỄ YÊU THƯƠNG</span>
+            <div class="pc-ribbon-stage">
+              <div class="pc-studio-photo pc-studio-left">
+                <img src="/petcare_foundation/static/src/img/banner-meo-hop-qua.jpg" alt="Mèo con đáng yêu bên hộp quà"/>
+              </div>
+              <div class="pc-ribbon-copy">
+                <span class="pc-ribbon-kicker">Ưu đãi đặc biệt</span>
+                <h1>GIẢM ĐẾN 50%</h1>
+                <p>Thêm quà xinh &amp; ưu đãi mỗi ngày cho chó mèo.</p>
+                <a class="petcare-btn" href="/shop">Khám phá cửa hàng</a>
+              </div>
+              <div class="pc-studio-photo pc-studio-right">
+                <img src="/petcare_foundation/static/src/img/banner-cun-hop-qua.jpg" alt="Cún con xinh xắn trong hộp quà"/>
+              </div>
+            </div>
+          </article>
+
+          <!-- Slide 2: Nền xanh lá pastel + sao lấp lánh hồng (phong cách ảnh 10) -->
+          <article class="pc-slide pc-slide-editorial pc-editorial-mint" aria-hidden="true">
+            <svg class="pc-sparkle pc-sp-1" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 0L18.6 13.4L32 16L18.6 18.6L16 32L13.4 18.6L0 16L13.4 13.4Z"/></svg>
+            <svg class="pc-sparkle pc-sp-2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0L14.2 9.8L24 12L14.2 14.2L12 24L9.8 14.2L0 12L9.8 9.8Z"/></svg>
+            <svg class="pc-sparkle pc-sp-3" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 0L18.6 13.4L32 16L18.6 18.6L16 32L13.4 18.6L0 16L13.4 13.4Z"/></svg>
+            <svg class="pc-sparkle pc-sp-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0L14.2 9.8L24 12L14.2 14.2L12 24L9.8 14.2L0 12L9.8 9.8Z"/></svg>
+            <div class="pc-editorial-stage">
+              <div class="pc-editorial-copy">
+                <span class="pc-editorial-tag">COMBO QUÀ TẶNG</span>
+                <h2><span class="pc-light">Mua 2 sản phẩm,</span><br/><strong>tặng ngay quà xinh</strong></h2>
+                <p>Áp dụng cho thức ăn, đồ thưởng và phụ kiện chó mèo mỗi ngày.</p>
+                <a class="petcare-btn" href="/shop">Mua sắm ngay</a>
+              </div>
+              <div class="pc-editorial-media">
+                <div class="pc-photo-frame pc-frame-pink pc-frame-square">
+                  <img src="/petcare_foundation/static/src/img/banner-hai-be-le-hoi.jpg" alt="Hai bé cún trắng diện trang phục lễ hội đáng yêu"/>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Slide 3: Nền hồng pastel + sao lấp lánh xanh lá (phong cách ảnh 10) -->
+          <article class="pc-slide pc-slide-editorial pc-editorial-pink" aria-hidden="true">
+            <svg class="pc-sparkle pc-sp-1" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 0L18.6 13.4L32 16L18.6 18.6L16 32L13.4 18.6L0 16L13.4 13.4Z"/></svg>
+            <svg class="pc-sparkle pc-sp-2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0L14.2 9.8L24 12L14.2 14.2L12 24L9.8 14.2L0 12L9.8 9.8Z"/></svg>
+            <svg class="pc-sparkle pc-sp-3" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 0L18.6 13.4L32 16L18.6 18.6L16 32L13.4 18.6L0 16L13.4 13.4Z"/></svg>
+            <svg class="pc-sparkle pc-sp-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0L14.2 9.8L24 12L14.2 14.2L12 24L9.8 14.2L0 12L9.8 9.8Z"/></svg>
+            <div class="pc-editorial-stage">
+              <div class="pc-editorial-copy">
+                <span class="pc-editorial-tag">CHĂM SÓC THÚ CƯNG</span>
+                <h2><span class="pc-light">Luôn bên bé yêu,</span><br/><strong>đặt lịch thật dễ</strong></h2>
+                <p>Lưu hồ sơ thú cưng và chọn dịch vụ chăm sóc dịu dàng cho chó mèo.</p>
+                <a class="petcare-btn" href="/petcare/services">Khám phá dịch vụ</a>
+              </div>
+              <div class="pc-editorial-media">
+                <div class="pc-photo-frame pc-frame-mint">
+                  <img src="/petcare_foundation/static/src/img/banner-cun-va-meo-con.jpg" alt="Cún con và mèo con nằm cạnh nhau thật ấm áp"/>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <button class="pc-slide-arrow pc-prev" type="button" aria-label="Banner trước">‹</button>
+          <button class="pc-slide-arrow pc-next" type="button" aria-label="Banner tiếp theo">›</button>
+          <div class="pc-slide-controls">
+            <button class="pc-pause" type="button" aria-label="Tạm dừng trình chiếu">❚❚</button>
+            <button class="pc-dot is-active" type="button" aria-label="Banner 1" aria-current="true"/>
+            <button class="pc-dot" type="button" aria-label="Banner 2"/>
+            <button class="pc-dot" type="button" aria-label="Banner 3"/>
+          </div>
+        </section>
+        <div class="pc-welcome"><div><span class="pc-welcome-title">Xin chào, bạn nhỏ!</span><span>Cùng chăm sóc các bé mỗi ngày nhé.</span></div><a href="/my">Tài khoản của tôi <span>→</span></a><a href="/petcare/booking">Đặt lịch chăm sóc <span>→</span></a></div>
+        <section class="pc-section"><div class="pc-section-heading"><div><span class="pc-section-kicker">MỘT CHÚT YÊU THƯƠNG</span><h2>Khám phá thêm cho bé</h2></div><a href="/shop">Xem cửa hàng →</a></div><div class="pc-feature-tiles"><a t-att-href="'/shop/category/%s' % dog_category.id if dog_category else '/shop'"><span>Cho những chiếc đuôi vui vẻ</span><strong>Dành cho chó</strong><small>Khám phá ngay →</small></a><a t-att-href="'/shop/category/%s' % cat_category.id if cat_category else '/shop'"><span>Dành cho những bé đáng yêu</span><strong>Dành cho mèo</strong><small>Khám phá ngay →</small></a><a href="/petcare/services"><span>Một buổi chăm sóc dịu dàng</span><strong>Dịch vụ cho bé</strong><small>Xem dịch vụ →</small></a></div></section>
+        <section class="pc-section"><div class="pc-section-heading"><div><span class="pc-section-kicker">MUA SẮM THEO NHU CẦU</span><h2>Chọn thế giới của bé</h2></div></div><div class="pc-category-cards"><a t-att-href="'/shop/category/%s' % dog_category.id if dog_category else '/shop'"><span class="pc-cat-media"><img src="/petcare_foundation/static/src/img/cho-card.png" alt="Chó nhỏ"/></span><div><strong>Dành cho chó</strong><span>Thức ăn và sản phẩm chăm sóc →</span></div></a><a t-att-href="'/shop/category/%s' % cat_category.id if cat_category else '/shop'"><span class="pc-cat-media"><img src="/petcare_foundation/static/src/img/meo-card.png" alt="Mèo nhỏ"/></span><div><strong>Dành cho mèo</strong><span>Những điều bé yêu thích →</span></div></a><a href="/petcare/services"><span class="pc-cat-media"><img src="/petcare_foundation/static/src/img/gan-ket-bua-an.jpg" alt="Chó và mèo cùng thưởng thức bữa ăn"/></span><div><strong>Dịch vụ chăm sóc</strong><span>Đặt lịch cho người bạn nhỏ →</span></div></a></div></section>
+        <section class="pc-profile-banner"><img class="pc-profile-img-left" src="/petcare_foundation/static/src/img/gan-ket-ngu-cung.jpg" alt="Cún con và mèo con ngủ cạnh nhau ấm áp"/><div><span class="pc-section-kicker">GẮN KẾT YÊU THƯƠNG</span><h2>Chăm sóc bé<br/>theo cách của riêng mình</h2><p>Lưu hồ sơ thú cưng và chọn dịch vụ phù hợp cho bé.</p><a class="petcare-btn pc-pink-btn" href="/petcare/pets">Tạo hồ sơ thú cưng</a></div><img class="pc-profile-img-right" src="/petcare_foundation/static/src/img/gan-ket-tai-cun.jpg" alt="Mèo con nép dưới tai cún đầy yêu thương"/></section>
+      </div>
+    </div></t>
+  </template>
+  <template id="shop_nav" inherit_id="website_sale.products" name="PetCare shop navigation">
+    <xpath expr="//div[@id='wrap']/div[1]" position="before"><t t-call="petcare_foundation.nav"/></xpath>
+    <xpath expr="//span[normalize-space(text())='Search results for']" position="replace"><span class="text-muted">Kết quả tìm kiếm cho '</span></xpath>
+  </template>
+  <template id="shop_product_buttons_clean" inherit_id="website_sale.shop_product_buttons" name="Ẩn nút giỏ hàng tròn mặc định của Odoo">
+    <xpath expr="//button[hasclass('o_wsale_product_btn_primary')]" position="replace"/>
+  </template>
+  <template id="shop_product_quick_add" inherit_id="website_sale.products_item" name="Nút Thêm vào giỏ hàng trực tiếp trên thẻ sản phẩm">
+    <xpath expr="//div[hasclass('o_wsale_product_sub')]" position="after">
+      <t t-set="pc_card_variant_id" t-value="(variant.id if variant else False) or product._get_first_possible_variant_id()"/>
+      <div class="pc-card-cart-row" t-if="pc_card_variant_id">
+        <button type="button"
+                class="pc-quick-add-btn"
+                t-att-data-product-id="pc_card_variant_id"
+                t-att-data-product-template-id="product.id"
+                aria-label="Thêm vào giỏ hàng">
+          <i class="fa fa-shopping-cart" aria-hidden="true"/>
+          <span>Thêm vào giỏ hàng</span>
+        </button>
+      </div>
+    </xpath>
+  </template>
+  <template id="product_nav" inherit_id="website_sale.product" name="PetCare product navigation">
+    <xpath expr="//div[@id='wrap']/div[1]" position="before"><t t-call="petcare_foundation.nav"/></xpath>
+    <xpath expr="//div[contains(@t-attf-class, 'o_wsale_product_images')]" position="inside">
+      <t t-set="pc_variant" t-value="product_variant or product._create_first_product_variant()"/>
+      <t t-set="pc_in_wish" t-value="pc_variant and pc_variant._is_in_wishlist()"/>
+      <button t-if="pc_variant" type="button" t-attf-class="pc-wish-fab #{'is-wished' if pc_in_wish else ''}" t-att-data-product-id="pc_variant.id" t-att-aria-pressed="'true' if pc_in_wish else 'false'" t-att-title="'Bỏ khỏi yêu thích' if pc_in_wish else 'Thêm vào yêu thích'" aria-label="Thêm vào yêu thích">
+        <i t-attf-class="fa #{'fa-heart' if pc_in_wish else 'fa-heart-o'}" aria-hidden="true"/>
+      </button>
+      <span class="pc-zoom-hint" aria-hidden="true"><i class="fa fa-search-plus"/> Rê chuột lên ảnh để phóng to &amp; di chuyển</span>
+    </xpath>
+  </template>
+  <template id="wishlist_nav" inherit_id="website_sale_wishlist.product_wishlist" name="PetCare wishlist navigation">
+    <xpath expr="//div[@id='wrap']/div[1]" position="before"><t t-call="petcare_foundation.nav"/></xpath>
+  </template>
+  <template id="checkout_nav" inherit_id="website_sale.checkout_layout" name="PetCare checkout navigation"><xpath expr="//div[@id='wrap']/div[1]" position="before"><t t-call="petcare_foundation.nav"/></xpath></template>
+  <template id="portal_nav" inherit_id="portal.portal_layout" name="PetCare account navigation"><xpath expr="//div[@id='wrap']" position="before"><t t-call="petcare_foundation.nav"/></xpath></template>
+  <template id="pets" name="Hồ sơ thú cưng">
+    <t t-call="website.layout"><div id="wrap"><t t-call="petcare_foundation.nav"/><div class="petcare-content"><h1>Hồ sơ thú cưng của tôi</h1><p>Thông tin này gắn với tài khoản của bạn.</p>
+      <div class="petcare-cards"><div t-foreach="pets" t-as="pet"><b t-esc="pet.name"/><span t-esc="'Chó' if pet.species == 'dog' else 'Mèo'"/><span t-esc="pet.breed or ''"/><details><summary>Chỉnh sửa hồ sơ</summary><form t-att-action="'/petcare/pets/%s/edit' % pet.id" method="post" class="petcare-form"><input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/><label>Tên<input name="name" required="required" t-att-value="pet.name" maxlength="100"/></label><label>Loài<select name="species"><option value="dog" t-att-selected="pet.species == 'dog'">Chó</option><option value="cat" t-att-selected="pet.species == 'cat'">Mèo</option></select></label><label>Giống<input name="breed" t-att-value="pet.breed or ''"/></label><label>Ngày sinh<input type="date" name="birth_date" t-att-value="pet.birth_date or ''"/></label><label>Cân nặng (kg)<input type="number" step="0.1" min="0" max="200" name="weight" t-att-value="pet.weight or ''"/></label><label>Ghi chú chăm sóc<textarea name="notes" t-esc="pet.notes or ''"/></label><button class="petcare-btn">Cập nhật</button></form></details></div></div>
+      <h2>Thêm thú cưng</h2><form action="/petcare/pets/add" method="post" class="petcare-form"><input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/><label>Tên thú cưng<input name="name" required="required" maxlength="100"/></label><label>Loài<select name="species" required="required"><option value="dog">Chó</option><option value="cat">Mèo</option></select></label><label>Giống<input name="breed" maxlength="100"/></label><label>Ngày sinh<input type="date" name="birth_date"/></label><label>Cân nặng (kg)<input type="number" step="0.1" min="0" max="200" name="weight"/></label><label>Ghi chú chăm sóc<textarea name="notes" maxlength="2000"/></label><button class="petcare-btn" type="submit">Lưu hồ sơ</button></form><p><a href="/petcare/booking">Đặt lịch chăm sóc →</a></p></div></div></t>
+  </template>
+  <template id="services" name="Dịch vụ chăm sóc thú cưng">
+    <t t-call="website.layout">
+      <div id="wrap" class="petcare-page">
+        <t t-call="petcare_foundation.nav"/>
+        <div class="petcare-content pc-salon-page">
+          <!-- 1. Banner Salon sọc xanh lá + hồng pastel với 2 ảnh spa 2 bên -->
+          <section class="pc-salon-hero">
+            <div class="pc-salon-hero-stage">
+              <div class="pc-salon-hero-photo pc-salon-hero-left">
+                <img src="/petcare_foundation/static/src/img/salon-hero-bath-dog.jpg" alt="Cún Golden quấn khăn spa ngậm bàn chải trong bọt xà phòng"/>
+              </div>
+              <div class="pc-salon-emblem">
+                <span class="pc-salon-icon"><i class="fa fa-scissors" aria-hidden="true"/></span>
+                <span class="pc-salon-kicker">PETCARE HUB SALON</span>
+                <h1>Salon Chăm Sóc Thú Cưng</h1>
+                <p>Trải nghiệm tắm gội dịu nhẹ và cắt tỉa tạo kiểu an toàn, tận tâm cho cả chó và mèo.</p>
+              </div>
+              <div class="pc-salon-hero-photo pc-salon-hero-right">
+                <img src="/petcare_foundation/static/src/img/salon-hero-trim-dog.jpg" alt="Bé cún vui vẻ bên bộ dụng cụ lược, gương, kéo và tông đơ grooming"/>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. Thanh đặt lịch nhanh (như ảnh 1) -->
+          <form id="quick-book" action="/petcare/booking" method="get" class="pc-salon-quickbar">
+            <div class="pc-quick-field">
+              <label for="pc-q-species">Loài thú cưng</label>
+              <select id="pc-q-species" name="species">
+                <option value="dog">Chó</option>
+                <option value="cat">Mèo</option>
+              </select>
+            </div>
+            <div class="pc-quick-field">
+              <label for="pc-q-service">Chọn dịch vụ</label>
+              <select id="pc-q-service" name="service_id">
+                <t t-foreach="services" t-as="s">
+                  <option t-att-value="s.id" t-esc="s.name"/>
+                </t>
+              </select>
+            </div>
+            <div class="pc-quick-actions">
+              <button type="submit" class="petcare-btn">Đặt lịch ngay</button>
+              <a class="pc-quick-pet-link" href="/petcare/pets">Quản lý hồ sơ bé →</a>
+            </div>
+          </form>
+
+          <!-- 3. Dải cam kết dịch vụ -->
+          <div class="pc-salon-strip">
+            <div class="pc-salon-strip-copy">
+              <strong>Tặng kèm vệ sinh tai &amp; cắt dũa móng</strong>
+              <span>khi đặt lịch tắm cơ bản hoặc cắt tỉa lông trực tuyến tại PetCare Hub.</span>
+            </div>
+            <span class="pc-salon-strip-badge"><i class="fa fa-scissors" aria-hidden="true"/> GROOMING</span>
+          </div>
+
+          <!-- 4. Bảng Menu Giá Spa đóng khung kiểu Salon cao cấp (giữ nguyên nội dung giá + ảnh cún spa) -->
+          <section class="pc-menu-board" aria-label="Bảng giá tham khảo theo cân nặng">
+            <div class="pc-menu-board-left">
+              <div class="pc-menu-arch">
+                <img src="/petcare_foundation/static/src/img/salon-spa-yorkie.jpg" alt="Thú cưng thư giãn chăm sóc tại PetCare Hub Salon"/>
+              </div>
+              <div class="pc-menu-caption">
+                <span>PETCARE HUB GROOMING</span>
+                <small>Chăm sóc dịu nhẹ theo từng hạng cân</small>
+              </div>
+            </div>
+
+            <div class="pc-menu-sheet">
+              <div class="pc-menu-sheet-head">
+                <span class="pc-menu-rule"><span>PETCARE SPA MENU</span></span>
+                <h2>Bảng giá tham khảo theo cân nặng</h2>
+                <p>Giá dịch vụ được tính theo cân nặng thực tế của bé để nhân viên chuẩn bị đúng thời lượng và lượng sữa tắm phù hợp.</p>
+              </div>
+
+              <div class="pc-menu-cols-head">
+                <span>Hạng cân của bé</span>
+                <span>Tắm cơ bản</span>
+                <span>Cắt tỉa lông</span>
+              </div>
+
+              <div class="pc-menu-rows">
+                <div class="pc-menu-row">
+                  <div class="pc-menu-tier">
+                    <span class="pc-size-stamp">S</span>
+                    <div>
+                      <strong>Dưới 5 kg</strong>
+                      <small>Chó giống nhỏ &amp; mèo con</small>
+                    </div>
+                  </div>
+                  <span class="pc-menu-dots" aria-hidden="true"/>
+                  <span class="pc-menu-price">180.000 ₫</span>
+                  <span class="pc-menu-price pc-price-trim">280.000 ₫</span>
+                </div>
+
+                <div class="pc-menu-row is-featured">
+                  <div class="pc-menu-tier">
+                    <span class="pc-size-stamp">M</span>
+                    <div>
+                      <strong>Từ 5 – 12 kg</strong>
+                      <small>Chó cỡ vừa &amp; mèo trưởng thành</small>
+                    </div>
+                  </div>
+                  <span class="pc-menu-dots" aria-hidden="true"/>
+                  <span class="pc-menu-price">250.000 ₫</span>
+                  <span class="pc-menu-price pc-price-trim">380.000 ₫</span>
+                </div>
+
+                <div class="pc-menu-row">
+                  <div class="pc-menu-tier">
+                    <span class="pc-size-stamp">L</span>
+                    <div>
+                      <strong>Trên 12 kg</strong>
+                      <small>Chó cỡ trung &amp; giống lớn</small>
+                    </div>
+                  </div>
+                  <span class="pc-menu-dots" aria-hidden="true"/>
+                  <span class="pc-menu-price">340.000 ₫</span>
+                  <span class="pc-menu-price pc-price-trim">490.000 ₫</span>
+                </div>
+              </div>
+
+              <div class="pc-menu-sheet-foot">
+                <span><i class="fa fa-check-circle" aria-hidden="true"/> Đã bao gồm vệ sinh tai &amp; cắt dũa móng.</span>
+                <a class="petcare-btn pc-menu-cta" href="/petcare/booking">Đặt lịch ngay →</a>
+              </div>
+            </div>
+          </section>
+
+          <!-- 5. Tab lọc & 2 thẻ dịch vụ chính (Tắm cơ bản & Cắt tỉa lông) -->
+          <section id="service-menu" class="pc-lux-menu-section">
+            <div class="pc-lux-menu-head">
+              <div>
+                <span class="pc-salon-kicker">BẢNG DỊCH VỤ CHÍNH THỨC</span>
+                <h2>Chọn gói chăm sóc phù hợp cho bé</h2>
+              </div>
+              <div class="pc-svc-tabs" role="tablist" aria-label="Phân loại dịch vụ">
+                <button type="button" class="pc-svc-tab is-active" data-svc-filter="all" role="tab" aria-selected="true">Tất cả dịch vụ</button>
+                <button type="button" class="pc-svc-tab" data-svc-filter="bath" role="tab" aria-selected="false">Tắm cơ bản</button>
+                <button type="button" class="pc-svc-tab" data-svc-filter="trim" role="tab" aria-selected="false">Cắt tỉa lông</button>
+              </div>
+            </div>
+
+            <div class="pc-salon-grid" t-if="services">
+              <t t-foreach="services" t-as="s">
+                <t t-set="is_trim" t-value="'tỉa' in (s.name or '').lower() or 'cắt' in (s.name or '').lower()"/>
+                <article t-att-id="'cat-tia-long' if is_trim else 'tam-co-ban'" t-attf-class="pc-salon-card #{'pc-card-trim' if is_trim else 'pc-card-bath'}" t-att-data-svc-type="'trim' if is_trim else 'bath'">
+                  <div class="pc-salon-card-media">
+                    <span t-attf-class="pc-salon-badge #{'pc-badge-coral' if is_trim else 'pc-badge-teal'}" t-esc="'✦ Tạo kiểu &amp; Gỡ rối' if is_trim else '★ Phổ biến nhất'"/>
+                    <img t-att-src="'/petcare_foundation/static/src/img/service-cat-tia-long.jpg' if is_trim else '/petcare_foundation/static/src/img/service-tam-co-ban.jpg'" t-att-alt="s.name"/>
+                  </div>
+                  <div class="pc-salon-card-body">
+                    <div class="pc-salon-card-meta">
+                      <span class="pc-salon-duration"><i class="fa fa-clock-o" aria-hidden="true"/> <t t-esc="'60 – 90 phút' if is_trim else '45 – 60 phút'"/></span>
+                      <span class="pc-salon-price" t-esc="'Từ 280.000 ₫' if is_trim else 'Từ 180.000 ₫'"/>
+                    </div>
+                    <h3 t-esc="s.name"/>
+                    <p class="pc-salon-desc" t-esc="s.description or ('Chăm sóc gỡ rối, cắt tỉa tạo kiểu gọn gàng phù hợp với từng giống chó mèo.' if is_trim else 'Tắm sạch bằng sữa tắm dịu nhẹ chuyên dụng, sấy khô mượt và vệ sinh cơ bản cho chó mèo.')"/>
+                    <ul class="pc-salon-checklist" t-if="not is_trim">
+                      <li><i class="fa fa-check-circle" aria-hidden="true"/> Tắm sữa tắm hữu cơ dịu nhẹ an toàn cho da nhạy cảm</li>
+                      <li><i class="fa fa-check-circle" aria-hidden="true"/> Sấy khô tạo độ bông mềm và chải mượt lông toàn thân</li>
+                      <li><i class="fa fa-check-circle" aria-hidden="true"/> Vệ sinh tai, khóe mắt và cắt dũa móng nhẹ nhàng</li>
+                      <li><i class="fa fa-check-circle" aria-hidden="true"/> Xịt dưỡng khử mùi thơm dịu dành riêng cho thú cưng</li>
+                    </ul>
+                    <ul class="pc-salon-checklist" t-if="is_trim">
+                      <li><i class="fa fa-check-circle" aria-hidden="true"/> Chải gỡ rối lông toàn thân nhẹ nhàng, không làm bé sợ</li>
+                      <li><i class="fa fa-check-circle" aria-hidden="true"/> Cắt tỉa tạo kiểu gọn gàng, thoáng mát theo từng giống</li>
+                      <li><i class="fa fa-check-circle" aria-hidden="true"/> Cắt gọn lông vùng mặt, đệm bàn chân và vùng vệ sinh</li>
+                      <li><i class="fa fa-check-circle" aria-hidden="true"/> Sấy chải hoàn thiện và dưỡng lông mềm mượt bóng khỏe</li>
+                    </ul>
+                    <div class="pc-salon-card-foot">
+                      <a t-attf-class="petcare-btn #{'pc-pink-btn' if is_trim else ''}" t-att-href="'/petcare/booking?service_id=%s' % s.id">Đặt lịch ngay →</a>
+                      <a class="pc-quick-pet-link" href="/petcare/pets">Tạo hồ sơ bé</a>
+                    </div>
+                  </div>
+                </article>
+              </t>
+            </div>
+            <p t-if="not services">Chưa có dịch vụ được cấu hình.</p>
+          </section>
+        </div>
+      </div>
+    </t>
+  </template>
+  <template id="booking" name="Đặt lịch chăm sóc">
+    <t t-call="website.layout">
+      <div id="wrap" class="petcare-page">
+        <t t-call="petcare_foundation.nav"/>
+        <div class="petcare-content pc-booking-page">
+          <div class="pc-booking-head">
+            <span class="pc-section-kicker">ĐẶT LỊCH TRỰC TUYẾN</span>
+            <h1>Đặt lịch chăm sóc thú cưng</h1>
+            <p>Chọn hồ sơ thú cưng, gói dịch vụ và khung giờ phù hợp. Nhân viên PetCare Hub sẽ xem xét và xác nhận lịch hẹn cho bé.</p>
+          </div>
+          <p t-if="error" class="alert alert-warning">Khung giờ này đã hết chỗ. Vui lòng chọn giờ khác.</p>
+          <div class="pc-booking-layout">
+            <div class="pc-booking-panel">
+              <h2>Thông tin lịch hẹn</h2>
+              <div t-if="not pets" class="pc-booking-empty-pet">
+                <strong>Bạn chưa có hồ sơ thú cưng nào</strong>
+                <p>Hãy tạo hồ sơ cho bé chó hoặc bé mèo trước để nhân viên chuẩn bị dịch vụ phù hợp nhất nhé.</p>
+                <a class="petcare-btn pc-pink-btn" href="/petcare/pets">Tạo hồ sơ thú cưng ngay →</a>
+              </div>
+              <form t-if="pets and services and slots" action="/petcare/booking/add" method="post" class="petcare-form">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <label>Thú cưng
+                  <select name="pet_id">
+                    <option t-foreach="pets" t-as="p" t-att-value="p.id" t-esc="p.name"/>
+                  </select>
+                </label>
+                <label>Dịch vụ chăm sóc
+                  <select name="service_id">
+                    <option t-foreach="services" t-as="s" t-att-value="s.id" t-att-selected="s.id == selected_service_id" t-esc="s.name"/>
+                  </select>
+                </label>
+                <label>Khung giờ còn trống
+                  <select name="slot_id">
+                    <option t-foreach="slots" t-as="slot" t-att-value="slot.id" t-esc="slot.name"/>
+                  </select>
+                </label>
+                <button class="petcare-btn" type="submit">Gửi yêu cầu đặt lịch</button>
+              </form>
+              <p t-if="pets and (not services or not slots)" class="text-muted mt-3">Hiện chưa có dịch vụ hoặc khung giờ phù hợp.</p>
+            </div>
+            <div class="pc-booking-panel">
+              <h2>Lịch hẹn đã gửi</h2>
+              <div t-if="bookings" class="pc-booking-list">
+                <div t-foreach="bookings" t-as="b" class="pc-booking-item">
+                  <div>
+                    <strong t-esc="b.pet_id.name"/> · <span t-esc="b.service_id.name"/>
+                    <div class="pc-booking-slot" t-esc="b.slot_id.name"/>
+                  </div>
+                  <span t-attf-class="pc-state-pill pc-state-#{b.state}" t-esc="dict(b._fields['state'].selection).get(b.state)"/>
+                </div>
+              </div>
+              <p t-if="not bookings" class="text-muted">Bạn chưa có yêu cầu đặt lịch nào.</p>
+              <div class="mt-3"><a href="/petcare/services" class="pc-quick-pet-link">← Quay lại xem bảng dịch vụ</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </t>
+  </template>
+  <template id="product_cta_vi" inherit_id="website_sale.cta_wrapper" name="Nút thêm giỏ tiếng Việt"><xpath expr="//a[@id='add_to_cart']" position="replace"><a id="add_to_cart" role="button" href="#" t-attf-class="btn btn-primary js_check_product a-submit flex-grow-1" t-att-data-show-quantity="is_view_active('website_sale.product_quantity')" data-animation-selector=".o_wsale_product_images"><i class="fa fa-shopping-cart me-2"/>Thêm vào giỏ</a></xpath></template>
+  <template id="all_products_vi" inherit_id="website_sale.all_products_link_name" name="Danh mục tiếng Việt"><xpath expr="//span" position="replace"><span>Tất cả sản phẩm</span></xpath></template>
+  <template id="footer_petcare" inherit_id="website.layout" name="Chân trang PetCare">
+    <xpath expr="//head" position="inside">
+      <link rel="preconnect" href="https://fonts.googleapis.com"/>
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+      <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&amp;family=Lora:ital,wght@0,600;0,700;1,500&amp;display=swap" rel="stylesheet"/>
+    </xpath>
+    <xpath expr="//footer[@id='bottom']" position="inside">
+      <div class="pc-footer"><div class="pc-footer-inner"><div class="pc-footer-about"><a class="petcare-logo" href="/">PETCARE HUB<span class="petcare-logo-dot">.</span></a><p>Một nơi nhỏ dành cho những tình yêu lớn. Cùng bạn chăm sóc chó và mèo mỗi ngày.</p></div><div class="pc-footer-links"><h3>Khám phá</h3><a href="/shop">Cửa hàng</a><a href="/petcare/services">Dịch vụ chăm sóc</a><a href="/petcare/booking">Đặt lịch</a></div><div class="pc-footer-links"><h3>Tài khoản</h3><a href="/my">Tài khoản của tôi</a><a href="/petcare/pets">Hồ sơ thú cưng</a><a href="/my/orders">Đơn hàng của tôi</a></div></div><div class="pc-footer-bottom">PetCare Hub · Chăm chút từng khoảnh khắc bên bé</div></div>
+    </xpath>
+  </template>
+
+</odoo>

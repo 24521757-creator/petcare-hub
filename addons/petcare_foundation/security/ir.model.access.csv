@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_demo_pet_staff,petcare demo pet staff,model_petcare_demo_pet,base.group_user,1,1,1,0
+access_demo_service_staff,petcare demo service staff,model_petcare_demo_service,base.group_user,1,1,1,0
+access_demo_slot_staff,petcare demo slot staff,model_petcare_demo_slot,base.group_user,1,1,1,0
+access_demo_booking_staff,petcare demo booking staff,model_petcare_demo_booking,base.group_user,1,1,1,0
