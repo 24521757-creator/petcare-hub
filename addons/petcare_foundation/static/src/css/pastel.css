@@ -7,8 +7,17 @@
 }
 
 body:has(.petcare-nav) {
-  font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  --bs-body-font-family: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  --bs-font-sans-serif: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  --headings-font: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  --navbar-font: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  --buttons-font: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  font-family: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif !important;
   -webkit-font-smoothing: antialiased;
+}
+
+body:has(.petcare-nav) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, button, input, select, textarea, .btn, .form-control, .form-select) {
+  font-family: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif !important;
 }
 
 body:has(.petcare-nav) h1,
@@ -17,8 +26,9 @@ body:has(.petcare-nav) h3,
 .pc-welcome-title,
 .pc-feature-tiles strong,
 .petcare-mega-promo strong {
-  font-family: 'Lora', Georgia, serif;
-  letter-spacing: -0.015em;
+  font-family: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif !important;
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
 }
 
 body:has(.petcare-nav) header#top {
@@ -62,10 +72,11 @@ body:has(.petcare-nav) header#top {
 }
 
 .petcare-logo,
-.petcare-nav .petcare-logo {
+.petcare-nav .petcare-logo,
+.pc-footer .petcare-logo {
   position: relative;
   z-index: 1;
-  font-family: 'Sigmar One', sans-serif;
+  font-family: 'Sigmar One', sans-serif !important;
   font-size: clamp(18px, 1.6vw, 25px);
   letter-spacing: -0.035em;
   line-height: 1.1;
@@ -168,7 +179,7 @@ body:has(.petcare-nav) header#top {
   background: #fbc5df;
   color: #1c4432;
   text-align: center;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 11px;
   font-weight: 700;
   line-height: 18px;
@@ -959,7 +970,7 @@ body:has(.petcare-nav) header#top {
    ========================================================================== */
 .pc-eyebrow,
 .pc-section-kicker {
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 11.5px;
   letter-spacing: 0.09em;
   font-weight: 700;
@@ -1353,7 +1364,7 @@ body:has(.petcare-nav) .oe_product_cart .o_wsale_product_information_text {
 }
 
 body:has(.petcare-nav) .oe_product_cart .o_wsale_products_item_title {
-  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
   font-size: 14.5px;
   font-weight: 600;
   line-height: 1.45;
@@ -1387,7 +1398,7 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
   border-radius: 9px;
   background: #2e6c54;
   color: #ffffff;
-  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 600;
   line-height: 1.25;
@@ -1744,7 +1755,7 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
 
 .pc-salon-kicker {
   display: inline-block;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1899,7 +1910,7 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
 
 .pc-menu-caption span {
   display: block;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -1908,9 +1919,9 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
 
 .pc-menu-caption small {
   display: block;
-  font-family: 'Lora', Georgia, serif;
-  font-style: italic;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 13.5px;
+  font-weight: 400;
   color: rgba(252, 247, 238, 0.84);
   margin-top: 3px;
 }
@@ -1938,7 +1949,7 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -1955,7 +1966,7 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
 }
 
 .pc-menu-sheet-head h2 {
-  font-family: 'Lora', Georgia, serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: clamp(24px, 2.4vw, 31px);
   font-weight: 700;
   color: #1b2923;
@@ -1977,7 +1988,7 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
   gap: 12px;
   padding: 0 14px 10px;
   border-bottom: 1.5px solid #243c32;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -2023,7 +2034,7 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
   border-radius: 50%;
   border: 1.5px solid #2b473b;
   color: #20392e;
-  font-family: 'Lora', Georgia, serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 15px;
   font-weight: 700;
   display: inline-flex;
@@ -2040,7 +2051,7 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
 
 .pc-menu-tier strong {
   display: block;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-size: 15.5px;
   font-weight: 700;
   color: #1b2923;
@@ -2062,7 +2073,7 @@ body:has(.petcare-nav) .oe_product_cart .pc-card-cart-row {
 
 .pc-menu-price {
   text-align: right;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   font-variant-numeric: tabular-nums;
   font-size: 16.5px;
   font-weight: 700;

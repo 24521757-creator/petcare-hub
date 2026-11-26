@@ -4,6 +4,7 @@
     <t t-set="cat_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Mèo'),('parent_id','=',False)],limit=1)"/>
     <t t-set="dog_dry_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Thức ăn khô'),('parent_id.parent_id','=',dog_category.id)],limit=1) if dog_category else False"/>
     <t t-set="cat_dry_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Thức ăn khô'),('parent_id.parent_id','=',cat_category.id)],limit=1) if cat_category else False"/>
+    <t t-set="cat_wet_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Thức ăn ướt'),('parent_id.parent_id','=',cat_category.id)],limit=1) if cat_category else False"/>
     <t t-set="dog_toys_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Đồ chơi cho chó'),('parent_id','=',dog_category.id)],limit=1) if dog_category else False"/>
     <t t-set="cat_toys_category" t-value="request.env['product.public.category'].sudo().search([('name','=','Đồ chơi cho mèo'),('parent_id','=',cat_category.id)],limit=1) if cat_category else False"/>
     <div class="petcare-nav" data-petcare-nav="1">
@@ -68,7 +69,7 @@
                   <a class="petcare-mega-heading" t-att-href="'/shop/category/%s' % cat_category.id if cat_category else '/shop?search=cat'">Thức ăn cho mèo <span>›</span></a>
                   <a t-att-href="'/shop/category/%s' % cat_category.id if cat_category else '/shop?search=cat'">Xem tất cả cho mèo</a>
                   <a t-att-href="'/shop/category/%s' % cat_dry_category.id if cat_dry_category else ('/shop/category/%s?search=thức+ăn+khô' % cat_category.id if cat_category else '/shop?search=thức+ăn+khô')">Thức ăn khô</a>
-                  <a t-att-href="'/shop/category/%s?search=thức+ăn+ướt' % cat_category.id if cat_category else '/shop?search=thức+ăn+ướt+cho+mèo'">Thức ăn ướt</a>
+                  <a t-att-href="'/shop/category/%s' % cat_wet_category.id if cat_wet_category else ('/shop/category/%s?search=thức+ăn+ướt' % cat_category.id if cat_category else '/shop?search=thức+ăn+ướt+cho+mèo')">Thức ăn ướt &amp; Pate</a>
                   <a t-att-href="'/shop/category/%s?search=mèo+con' % cat_category.id if cat_category else '/shop?search=mèo+con'">Dành cho mèo con</a>
                   <a t-att-href="'/shop/category/%s?search=trưởng+thành' % cat_category.id if cat_category else '/shop?search=trưởng+thành'">Dành cho mèo trưởng thành</a>
                 </div>
@@ -510,7 +511,7 @@
     <xpath expr="//head" position="inside">
       <link rel="preconnect" href="https://fonts.googleapis.com"/>
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
-      <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&amp;family=Lora:ital,wght@0,600;0,700;1,500&amp;display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;display=swap" rel="stylesheet"/>
     </xpath>
     <xpath expr="//footer[@id='bottom']" position="inside">
       <div class="pc-footer"><div class="pc-footer-inner"><div class="pc-footer-about"><a class="petcare-logo" href="/">PETCARE HUB<span class="petcare-logo-dot">.</span></a><p>Một nơi nhỏ dành cho những tình yêu lớn. Cùng bạn chăm sóc chó và mèo mỗi ngày.</p></div><div class="pc-footer-links"><h3>Khám phá</h3><a href="/shop">Cửa hàng</a><a href="/petcare/services">Dịch vụ chăm sóc</a><a href="/petcare/booking">Đặt lịch</a></div><div class="pc-footer-links"><h3>Tài khoản</h3><a href="/my">Tài khoản của tôi</a><a href="/petcare/pets">Hồ sơ thú cưng</a><a href="/my/orders">Đơn hàng của tôi</a></div></div><div class="pc-footer-bottom">PetCare Hub · Chăm chút từng khoảnh khắc bên bé</div></div>
