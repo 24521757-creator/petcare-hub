@@ -1,0 +1,5 @@
+website=env['website'].sudo().browse(1).exists()
+if not website: raise RuntimeError('Không tìm thấy website cần cập nhật')
+website.write({'name':'PetCare Hub','homepage_url':'/petcare'})
+env.cr.commit()
+print('Homepage set to /petcare')

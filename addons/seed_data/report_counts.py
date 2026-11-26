@@ -1,0 +1,2 @@
+P=env['product.template'].sudo()
+for n,d in [('dataset', [('default_code','=like','LAB3-%')]),('cat_new',[('default_code','=like','PETSMART-%')]),('published',[('default_code','=like','LAB3-%'),('website_published','=',True)]),('unpublished',[('default_code','=like','LAB3-%'),('website_published','=',False)]),('chewy',[('default_code','=like','LAB3-CHEWY-%')]),('petsmart',[('default_code','=like','LAB3-PETSMART-%')])]: print(n,P.search_count(d))

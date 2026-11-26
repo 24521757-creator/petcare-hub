@@ -1,0 +1,124 @@
+@startuml sequence_UC05
+title PETCARE HUB – Biểu đồ trình tự UC-05: Đặt hàng & thanh toán trực tuyến
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #404040
+skinparam sequence {
+  LifeLineBorderColor #7F7F7F
+  ParticipantBackgroundColor #FFF2CC
+  ParticipantBorderColor #BF9000
+  ActorBackgroundColor #DEEAF6
+  ActorBorderColor #2E75B6
+  GroupBorderColor #2E75B6
+  GroupBackgroundColor #DEEAF6
+}
+skinparam database {
+  BackgroundColor #E2EFDA
+  BorderColor #548235
+}
+autonumber "<b>0."
+
+actor "Khách hàng" as KH
+boundary "Website controller\n(website_sale:\nWebsiteSale, PaymentPortal)" as WC
+boundary "Payment controller\n(StripeController, CustomController,\nPaymentPostProcessing)" as PC
+entity "sale.order" as SO
+entity "payment.transaction" as TX
+database "PostgreSQL\n(sale_order, payment_transaction,\nsale_order_transaction_rel,\nstock_picking)" as DB
+participant "Stripe API\n(hệ ngoài – hộp đen)" as ST #F2F2F2
+
+== Mở trang thanh toán ==
+KH -> WC : GET /shop/payment
+WC -> SO : tính lại giá, thuế, phí giao hàng
+SO -> DB : SELECT / UPDATE sale_order, sale_order_line
+WC --> KH : tóm tắt đơn + phương thức (Stripe, COD)
+
+== Tạo giao dịch ==
+KH -> WC : chọn phương thức, nhấn "Thanh toán ngay"\nPOST /shop/payment/transaction/<order_id>
+WC -> DB : SELECT 1 FROM sale_order\nWHERE id = ... FOR NO KEY UPDATE NOWAIT
+WC -> SO : _check_cart_is_ready_to_be_paid()
+alt Hết hàng (E1) / giỏ trống / thiếu phương thức giao hàng
+  SO --> WC : ValidationError
+  WC --> KH : báo lỗi, không tạo giao dịch
+else Tổng tiền khác trang khách đang xem (E6)
+  WC --> KH : "The cart has been updated.\nPlease refresh the page."
+else Hợp lệ
+  WC -> TX : _create_transaction(provider, amount, currency,\nsale_order_ids = [order_id])
+  TX -> DB : INSERT payment_transaction (state = draft)\nINSERT sale_order_transaction_rel
+  WC -> TX : _get_processing_values()
+
+  alt Khách chọn COD (A1)
+    TX --> WC : giá trị xử lý (URL /payment/custom/process)
+    WC --> KH : chuyển tiếp biểu mẫu
+    KH -> PC : POST /payment/custom/process (reference)
+    PC -> TX : _process('custom', data)
+    TX -> TX : _apply_updates() → _set_pending()
+    TX -> DB : UPDATE payment_transaction\nSET state = 'pending'
+    PC --> KH : chuyển về /payment/status
+
+  else Khách chọn Stripe
+    TX -> ST : POST payment_intents\n(_stripe_create_intent)
+    alt Không kết nối được Stripe (E9)
+      ST --> TX : lỗi API
+      TX -> DB : state = 'error'
+      TX --> WC : client_secret rỗng
+      WC --> KH : báo lỗi, đơn vẫn draft
+    else Tạo PaymentIntent thành công
+      ST --> TX : PaymentIntent (client_secret)
+      TX --> WC : client_secret, return_url
+      WC --> KH : hiển thị khung nhập thẻ Stripe
+      KH -> ST : nhập thẻ test, xác nhận thanh toán\n(dữ liệu thẻ không đi qua Odoo)
+      opt Ngân hàng yêu cầu 3-D Secure (A3)
+        ST -> KH : trang xác thực
+        KH -> ST : xác thực
+      end
+      ST --> KH : chuyển trình duyệt về\n/payment/stripe/return?reference=...&payment_intent=...
+      KH -> PC : GET /payment/stripe/return
+      PC -> ST : GET payment_intents/{id}\n(hỏi lại kết quả, không tin tham số URL)
+      ST --> PC : PaymentIntent (status, amount, currency)
+      PC -> TX : _process('stripe', data)
+      TX -> TX : _validate_amount()
+      alt Số tiền / tiền tệ không khớp (E7)
+        TX -> DB : state = 'error'
+      else Thanh toán thành công (status = succeeded)
+        TX -> TX : _apply_updates() → _set_done()
+        TX -> DB : state = 'done', provider_reference = pi_...
+      else Bị từ chối / khách hủy (E2, E3)
+        TX -> TX : _apply_updates() → _set_error() / _set_canceled()
+        TX -> DB : state = 'error' / 'cancel'
+      else Chưa có kết quả cuối (E4)
+        TX -> TX : giữ draft / _set_pending(), chờ sự kiện webhook
+      end
+      PC --> KH : chuyển về /payment/status
+
+      note over PC, ST : Webhook chạy song song, có thể đến trước hoặc sau bước quay về trang.
+      ST ->> PC : POST /payment/stripe/webhook\n(payment_intent.succeeded, kèm Stripe-Signature)
+      PC -> PC : _verify_signature()\n(HMAC-SHA256, tối đa 10 phút)
+      alt Chữ ký sai (E5)
+        PC --> ST : 403 Forbidden, không xử lý
+      else Chữ ký đúng
+        PC -> TX : _process('stripe', data)
+        note right of TX : Giao dịch đã done thì sự kiện gửi lặp\nkhông làm đổi trạng thái lần nữa.
+        PC --> ST : 200 OK
+      end
+    end
+  end
+end
+
+== Hậu xử lý và xác nhận đơn ==
+KH -> PC : /payment/status/poll (trang trạng thái tự hỏi lại)
+PC -> TX : _post_process()
+alt Giao dịch done (Stripe) hoặc pending (COD)
+  TX -> TX : Stripe: _check_amount_and_confirm_order()\nCOD: _post_process() của module delivery
+  TX -> SO : action_confirm() (send_email = True)
+  SO -> SO : draft → sale, sinh phiếu kho (sale_stock)
+  SO -> DB : UPDATE sale_order SET state = 'sale'\nINSERT stock_picking (sale_id = order_id)
+  SO --> KH : email xác nhận đơn
+  PC --> KH : landing_route /shop/payment/validate
+  KH -> WC : GET /shop/payment/validate
+  WC --> KH : chuyển tới /shop/confirmation (mã đơn, tổng tiền)
+else Giao dịch error / cancel
+  PC --> KH : "Xử lý thanh toán không thành công",\nđơn vẫn draft, khách thử lại hoặc đổi phương thức
+end
+@enduml

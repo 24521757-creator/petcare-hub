@@ -1,0 +1,165 @@
+@startuml activity_UC05
+title PETCARE HUB – Biểu đồ hoạt động UC-05: Đặt hàng & thanh toán trực tuyến
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #404040
+skinparam activity {
+  BackgroundColor #FFF2CC
+  BorderColor #BF9000
+  DiamondBackgroundColor #DEEAF6
+  DiamondBorderColor #2E75B6
+}
+skinparam swimlane {
+  BorderColor #7F7F7F
+  TitleFontStyle bold
+}
+
+|Khách hàng|
+start
+:Mở giỏ hàng (/shop/cart),
+kiểm tra sản phẩm, số lượng
+và nhấn "Thanh toán";
+
+|Hệ thống PetCare Hub (Odoo 19)|
+if (Khách đã đăng nhập?) then (chưa – A5)
+  :Chuyển tới trang đăng nhập,
+  giữ đường dẫn quay lại;
+  |Khách hàng|
+  :Đăng nhập (hoặc đăng ký
+  rồi đăng nhập);
+  |Hệ thống PetCare Hub (Odoo 19)|
+else (rồi)
+endif
+:Mở trang /shop/checkout,
+hiển thị địa chỉ và
+phương thức giao hàng;
+
+repeat
+  |Khách hàng|
+  :Xác nhận hoặc nhập địa chỉ
+  giao hàng (A2), chọn
+  "Giao hàng tiêu chuẩn";
+  |Hệ thống PetCare Hub (Odoo 19)|
+  :Kiểm tra trường bắt buộc,
+  thêm phí giao hàng,
+  tính lại thuế và tổng tiền;
+repeat while (Có phương thức giao hàng\ncho địa chỉ này?) is (không – E8)
+->có;
+
+(P)
+:Mở trang /shop/payment,
+tính lại giá, hiển thị tóm tắt đơn
+và phương thức thanh toán;
+|Khách hàng|
+:Chọn phương thức thanh toán
+(Stripe hoặc COD);
+|Hệ thống PetCare Hub (Odoo 19)|
+:Khóa đơn, kiểm tra lại số lượng
+khả dụng, tổng tiền, phương thức
+giao hàng, đơn chưa thanh toán;
+
+if (Còn đủ hàng?) then (không – E1)
+  :Không tạo giao dịch,
+  báo số lượng còn lại;
+  |Khách hàng|
+  :Quay về giỏ hàng để sửa
+  (A4, thuộc UC-01);
+  stop
+else (đủ)
+endif
+|Hệ thống PetCare Hub (Odoo 19)|
+
+if (Tổng tiền khác trang\nkhách đang xem?) then (có – E6)
+  :Không tạo giao dịch,
+  yêu cầu tải lại trang;
+  (P)
+  detach
+else (không)
+endif
+
+if (Phương thức thanh toán?) then (COD – A1)
+  :Tạo giao dịch rồi chuyển
+  sang pending (không gọi
+  cổng thanh toán);
+else (Stripe)
+  :Tạo giao dịch draft,
+  yêu cầu Stripe tạo
+  phiên thanh toán;
+  if (Kết nối Stripe?) then (lỗi – E9)
+    :Giao dịch error,
+    báo lỗi, đơn vẫn draft;
+    (P)
+    detach
+  else (được)
+  endif
+  |Khách hàng|
+  :Nhập thẻ thử nghiệm trong
+  khung Stripe nhúng trên trang,
+  nhấn "Thanh toán ngay";
+  |Cổng thanh toán Stripe (test)|
+  :Nhận thông tin thẻ trực tiếp
+  từ trình duyệt, xử lý thẻ;
+  if (Cần 3-D Secure?) then (có – A3)
+    |Khách hàng|
+    :Xác thực với ngân hàng
+    phát hành thẻ;
+    |Cổng thanh toán Stripe (test)|
+  else (không)
+  endif
+  if (Kết quả xử lý thẻ?) then (từ chối / hủy – E2, E3)
+    |Hệ thống PetCare Hub (Odoo 19)|
+    :Báo thanh toán không thành công,
+    giao dịch error hoặc cancel,
+    đơn vẫn draft, giữ giỏ hàng;
+    |Khách hàng|
+    if (Khách chọn?) then (thử lại / đổi sang COD)
+      (P)
+      detach
+    else (dừng)
+      :Rời trang, đơn vẫn
+      ở trạng thái nháp;
+      stop
+    endif
+  else (thành công)
+  endif
+  |Cổng thanh toán Stripe (test)|
+  :Chuyển trình duyệt về Odoo,
+  gửi sự kiện thanh toán
+  thành công (webhook);
+  |Hệ thống PetCare Hub (Odoo 19)|
+  if (Odoo đã nhận\nđược kết quả?) then (chưa – E4)
+    :Giữ đơn chưa xác nhận,
+    chờ Stripe gửi lại sự kiện;
+  else (rồi)
+  endif
+  :Xác minh kết quả với Stripe,
+  bỏ qua thông báo sai chữ ký
+  hoặc gửi lặp (E5);
+  if (Số tiền, tiền tệ khớp?) then (không – E7)
+    :Giao dịch error, đơn không
+    xác nhận, nhân viên đối soát;
+    stop
+  else (khớp)
+  endif
+  :Giao dịch chuyển sang done;
+endif
+
+:Xác nhận đơn
+(sale.order: draft → sale);
+:Tạo phiếu xuất kho
+(stock.picking) để giữ hàng;
+:Gửi email xác nhận,
+mở trang /shop/confirmation;
+|Khách hàng|
+:Xem mã đơn, sản phẩm,
+phí giao hàng, tổng tiền;
+stop
+
+legend bottom
+  (P): quay lại bước mở trang thanh toán /shop/payment.
+  Mã A1–A5, E1–E9 tương ứng luồng thay thế và luồng ngoại lệ trong Bảng 3.3.
+  COD không đi qua cổng thanh toán; làn Cổng thanh toán chỉ tham gia khi khách chọn Stripe.
+endlegend
+@enduml

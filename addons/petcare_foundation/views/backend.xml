@@ -1,0 +1,14 @@
+<odoo>
+  <record id="product_source_form" model="ir.ui.view"><field name="name">product.template.petcare.source</field><field name="model">product.template</field><field name="inherit_id" ref="product.product_template_form_view"/><field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Nguồn sản phẩm"><group><field name="petcare_source_url" widget="url"/><field name="petcare_source_price"/><field name="petcare_source_currency"/><field name="petcare_exchange_rate"/><field name="petcare_source_weight"/></group></page></xpath></field></record>
+  <record id="action_pet" model="ir.actions.act_window"><field name="name">Hồ sơ thú cưng (thử nghiệm)</field><field name="res_model">petcare.demo.pet</field><field name="view_mode">list,form</field></record>
+  <record id="action_service" model="ir.actions.act_window"><field name="name">Dịch vụ (thử nghiệm)</field><field name="res_model">petcare.demo.service</field><field name="view_mode">list,form</field></record>
+  <record id="action_slot" model="ir.actions.act_window"><field name="name">Khung giờ (thử nghiệm)</field><field name="res_model">petcare.demo.slot</field><field name="view_mode">list,form</field></record>
+  <record id="action_booking" model="ir.actions.act_window"><field name="name">Lịch hẹn (thử nghiệm)</field><field name="res_model">petcare.demo.booking</field><field name="view_mode">list,form</field></record>
+  <record id="view_booking_form" model="ir.ui.view"><field name="name">petcare.demo.booking.form</field><field name="model">petcare.demo.booking</field><field name="arch" type="xml"><form><header><button name="action_confirm" type="object" string="Nhân viên xác nhận" invisible="state != 'pending'" class="btn-primary"/><button name="action_cancel" type="object" string="Hủy lịch" invisible="state == 'cancelled'"/><field name="state" widget="statusbar"/></header><sheet><group><field name="owner_id"/><field name="pet_id"/><field name="service_id"/><field name="slot_id"/><field name="expires_at"/><field name="note"/></group></sheet></form></field></record>
+  <record id="cron_booking_expire" model="ir.cron"><field name="name">PetCare: hủy lịch hết hạn</field><field name="model_id" ref="model_petcare_demo_booking"/><field name="state">code</field><field name="code">model.cron_expire()</field><field name="interval_number">1</field><field name="interval_type">minutes</field></record>
+  <menuitem id="menu_petcare" name="PetCare Hub" sequence="80" groups="base.group_user"/>
+  <menuitem id="menu_pet" name="Thú cưng" parent="menu_petcare" action="action_pet"/>
+  <menuitem id="menu_service" name="Dịch vụ" parent="menu_petcare" action="action_service"/>
+  <menuitem id="menu_slot" name="Khung giờ" parent="menu_petcare" action="action_slot"/>
+  <menuitem id="menu_booking" name="Lịch hẹn" parent="menu_petcare" action="action_booking"/>
+</odoo>
