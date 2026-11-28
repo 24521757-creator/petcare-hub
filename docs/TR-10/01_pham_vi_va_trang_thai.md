@@ -7,6 +7,8 @@ Tài liệu làm việc cho UC-05 / FR-003, cập nhật 28/11/2026. Đây là h
 - COD: nhóm đã lưu ảnh cấu hình, lựa chọn COD, đơn `S00001` đã chuyển sang đơn bán và phiếu giao hàng ở trạng thái sẵn sàng. Ảnh được ghi ngày 17/11/2026; đây là **bằng chứng lịch sử**, không thay thế việc kiểm tra lại cấu hình hiện tại. Đơn COD đã xác nhận không đồng nghĩa đã thu tiền.
 - Stripe: đã từng cài `payment_stripe`; trạng thái mới nhất, khóa test, webhook và các giao dịch **chưa được kiểm tra trong lượt này**. Không đánh dấu thành công hay thất bại cho tới khi có giao dịch thật trong môi trường Stripe test.
 - Bản sao lưu ngày 26/11 cho thấy Stripe đang tắt và các trường khóa Stripe chưa có giá trị; COD đang bật và được đăng trên website. Đây là kết quả đọc bản sao lưu, không khẳng định trạng thái hệ thống ngày 28/11.
+- Kiểm tra trực tiếp 28/11 sau khi Docker hoạt động: Stripe đã cài nhưng vẫn tắt, chưa có khóa công khai, khóa bí mật hoặc secret webhook; COD đang bật và được công bố.
+- Kiểm thử COD 28/11: tạo đơn **S00010** với khách và địa chỉ ghi rõ kiểm thử, tổng **758.725 VND**. Trang hiển thị xác nhận đơn; kiểm tra Odoo ghi nhận đơn `sale`, giao dịch COD `pending`, phiếu giao `assigned`. Đây là đơn kiểm thử trên dữ liệu nhóm, không xử lý giao hàng thật; cần nhóm nhận diện khi vận hành. Trang xác nhận còn một số chuỗi tiếng Anh cần Việt hóa.
 - Môi trường: ngày 28/11/2026, Docker Engine trả lỗi 500 và Odoo cổng 8070 không phản hồi trong lần kiểm tra. Không khởi động lại toàn bộ Docker khi chưa xác định ảnh hưởng tới các dịch vụ khác.
 - Dữ liệu bí mật, nội dung webhook, thông tin khách, hình thẻ và bản sao cơ sở dữ liệu không đưa vào kho GitHub.
 
