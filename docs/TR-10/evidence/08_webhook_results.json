@@ -1,0 +1,14 @@
+{
+  "real_deliveries_via_stripe_cli": [
+    {"event_id":"evt_3UgoufGhutUmVwA70YOVXKmx","type":"payment_intent.succeeded","local_time":"2026-11-28 23:55:48 Asia/Saigon","http_status":200},
+    {"event_id":"evt_3Ugow3GhutUmVwA70tAQWe2m","type":"payment_intent.payment_failed","local_time":"2026-11-28 23:57:14 Asia/Saigon","http_status":200},
+    {"event_id":"evt_3Ugox3GhutUmVwA70jdX07Rx","type":"payment_intent.canceled","local_time":"2026-11-28 23:58:15 Asia/Saigon","http_status":200}
+  ],
+  "replay_test": {
+    "event_id":"evt_3UgoufGhutUmVwA70YOVXKmx",
+    "signature_source":"HMAC generated locally with test signing secret; payload retrieved from real Stripe event",
+    "invalid_signature_http":403,
+    "valid_replays_http":[200,200],
+    "unchanged":{"transaction_state":"done","order_state":"sale","picking_count":1,"invoice_count":0,"matching_transaction_count":1}
+  }
+}

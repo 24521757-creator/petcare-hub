@@ -1,0 +1,83 @@
+{
+  "recorded_at_utc": "2026-11-28T17:00:42.572249+00:00",
+  "provider_mode": "test",
+  "transactions": [
+    {
+      "reference": "S00010",
+      "provider": "custom",
+      "state": "pending",
+      "amount": 758725.0,
+      "currency": "VND",
+      "orders": [
+        {
+          "reference": "S00010",
+          "state": "sale",
+          "picking_count": 1
+        }
+      ]
+    },
+    {
+      "reference": "S00011",
+      "provider": "stripe",
+      "state": "done",
+      "amount": 758725.0,
+      "currency": "VND",
+      "orders": [
+        {
+          "reference": "S00011",
+          "state": "sale",
+          "picking_count": 1
+        }
+      ],
+      "stripe": {
+        "id": "pi_3UgoufGhutUmVwA70xrPnXCu",
+        "status": "succeeded",
+        "amount": 758725,
+        "currency": "vnd",
+        "livemode": false
+      }
+    },
+    {
+      "reference": "S00012",
+      "provider": "stripe",
+      "state": "error",
+      "amount": 758725.0,
+      "currency": "VND",
+      "orders": [
+        {
+          "reference": "S00012",
+          "state": "draft",
+          "picking_count": 0
+        }
+      ],
+      "stripe": {
+        "id": "pi_3Ugow3GhutUmVwA70YMjCnSY",
+        "status": "requires_payment_method",
+        "amount": 758725,
+        "currency": "vnd",
+        "livemode": false
+      }
+    },
+    {
+      "reference": "TR10-CANCEL-S00012",
+      "provider": "stripe",
+      "state": "cancel",
+      "amount": 758725.0,
+      "currency": "VND",
+      "orders": [
+        {
+          "reference": "S00012",
+          "state": "draft",
+          "picking_count": 0
+        }
+      ],
+      "stripe": {
+        "id": "pi_3Ugox3GhutUmVwA70H4jjb89",
+        "status": "canceled",
+        "amount": 758725,
+        "currency": "vnd",
+        "livemode": false
+      }
+    }
+  ]
+}
