@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="confirmation_vi" inherit_id="website_sale.confirmation">
+        <xpath expr="//p[hasclass('alert-info')]/span[hasclass('align-middle')]" position="replace">
+            <span class="align-middle">để theo dõi đơn hàng của bạn.</span>
+        </xpath>
+    </template>
+    <template id="address_on_checkout_vi" inherit_id="website_sale.address_on_checkout">
+        <xpath expr="//p[@t-if='use_delivery_as_billing and not only_services']" position="replace">
+            <p t-if="use_delivery_as_billing and not only_services" t-att-class="delivery_title_classes">Giao hàng và thanh toán</p>
+        </xpath>
+        <xpath expr="//p[@t-else]" position="replace">
+            <p t-else="" t-att-class="delivery_title_classes">Địa chỉ thanh toán</p>
+        </xpath>
+    </template>
+    <template id="billing_address_vi" inherit_id="website_sale.billing_address_list">
+        <xpath expr="//span[@name='use_delivery_as_billing_text']" position="replace">
+            <span name="use_delivery_as_billing_text">Dùng địa chỉ giao hàng</span>
+        </xpath>
+    </template>
+    <template id="address_vi" inherit_id="website_sale.address">
+        <xpath expr="//div[hasclass('o_address_signin')]/span" position="replace">
+            <span class="align-middle">Bạn đã có tài khoản?</span>
+        </xpath>
+    </template>
+    <template id="quick_reorder_vi" inherit_id="website_sale.quick_reorder_button">
+        <xpath expr="//button[@id='quick_reorder_button']" position="replace">
+            <button type="button" id="quick_reorder_button" class="btn btn-link" data-bs-toggle="offcanvas" data-bs-target="#quick_reorder_sidebar" aria-controls="quick_reorder_sidebar" t-att-disabled="not order_history">
+                <i class="fa fa-rotate-left me-2"/>Mua lại đơn cũ
+            </button>
+        </xpath>
+    </template>
+    <template id="quick_reorder_sidebar_vi" inherit_id="website_sale.quick_reorder_sidebar">
+        <xpath expr="//h5[hasclass('offcanvas-title')]" position="replace">
+            <h5 class="offcanvas-title">Mua lại đơn cũ</h5>
+        </xpath>
+    </template>
+</odoo>

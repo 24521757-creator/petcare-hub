@@ -1,10 +1,10 @@
 # TR-10 — Kịch bản và minh chứng
 
-Tất cả kịch bản bên dưới hiện **CHƯA CHẠY LẠI**. Kết quả mong đợi không phải kết quả thực tế. Dùng khách hàng, sản phẩm, đơn và thẻ thử nghiệm; không dùng thông tin thanh toán thật.
+TC-01 đã chạy trên Odoo ngày 28/11/2026; TC-02 đến TC-05 **CHƯA CHẠY**. Kết quả mong đợi không phải kết quả thực tế. Dùng khách hàng, sản phẩm, đơn và thẻ thử nghiệm; không dùng thông tin thanh toán thật.
 
 | Mã | Kịch bản | Kết quả cần đối chiếu | Trạng thái |
 | --- | --- | --- | --- |
-| TC-01 | Đơn sản phẩm, chọn COD, xác nhận | Đơn được xác nhận theo cấu hình; giao dịch COD và công nợ thể hiện chưa thu tiền, có phiếu giao phù hợp. | Chưa chạy lại; có ảnh lịch sử 17/11 |
+| TC-01 | Đơn sản phẩm, chọn COD, xác nhận | Đơn được xác nhận theo cấu hình; giao dịch COD và công nợ thể hiện chưa thu tiền, có phiếu giao phù hợp. | Đạt phần checkout: S00010, 758.725 VND, đơn sale, transaction pending, phiếu giao assigned. Chưa kiểm tra hóa đơn/công nợ kế toán. |
 | TC-02 | Stripe test, thẻ thành công | Stripe ghi nhận thành công; transaction Odoo `done`, số tiền/tiền tệ khớp; đơn `sale` sau hậu xử lý. | Chưa chạy |
 | TC-03 | Stripe test, thẻ bị từ chối | Giao dịch không `done`; đơn không được xác nhận do giao dịch thất bại; ghi lại trạng thái thực tế, khách có thể thử lại hoặc đổi phương thức nếu giao diện hỗ trợ. | Chưa chạy |
 | TC-04 | Khách hủy/quay lại trước khi hoàn tất | Không kết luận đã thanh toán; ghi lại trạng thái transaction/đơn thực tế và kiểm tra hành động tiếp theo. | Chưa chạy |
